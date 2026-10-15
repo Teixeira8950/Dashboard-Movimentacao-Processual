@@ -79,13 +79,11 @@ button, select, input { font: inherit; color: inherit; }
 @media (max-width: 760px) { .banner { aspect-ratio: 1180 / 414; border-radius: 8px; } .banner img { width: calc(100% * 2000 / 1180); max-width: none; } }
 
 /* ---------- Filtros ---------- */
-.filtros { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 8px; position: sticky; top: 0; z-index: 5; box-shadow: 0 6px 16px -12px rgba(0,0,0,.5); }
+.filtros { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end; margin-bottom: 14px !important; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 8px; position: sticky; top: 0; z-index: 5; box-shadow: 0 6px 16px -12px rgba(0,0,0,.5); }
 .filtros label { display: flex; flex-direction: column; gap: 5px; font-size: 11.5px; color: var(--ink-3); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
 .filtros select, .filtros input { background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; padding: 6px 9px; height: 34px; text-transform: none; letter-spacing: 0; font-size: 13px; }
 .filtros select { min-width: 210px; }
-.periodo { display: flex; gap: 6px; align-items: center; }
-.periodo span { color: var(--ink-3); text-transform: none; letter-spacing: 0; font-weight: 400; }
-.filtros .btn-limpar { margin-left: auto; }
+.filtros .filtro-info { margin: 0 0 7px auto; text-align: right; }
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; height: 34px; }
 .seg button { background: var(--surface-2); border: 0; padding: 0 14px; cursor: pointer; display: flex; gap: 7px; align-items: center; font-size: 13px; color: var(--ink-2); text-transform: none; letter-spacing: 0; font-weight: 500; }
 .seg button + button { border-left: 1px solid var(--line); }
@@ -191,7 +189,7 @@ footer { margin-top: 30px; font-size: 12.5px; color: var(--ink-3); }
 @media (max-width: 760px) {
   .wrap { padding: 16px 16px 40px; }
   h1 { font-size: 21px; } .kpi .val { font-size: 32px; }
-  .filtros { position: static; } .filtros .btn-limpar { margin-left: 0; }
+  .filtros { position: static; } .filtros .filtro-info { margin: 0; text-align: left; }
   .filtros select { min-width: 0; width: 100%; } .filtros label { flex: 1 1 100%; }
   .fonte { flex: 1 1 140px; }
   .filtros .seg button { flex: 1; justify-content: center; }
@@ -227,12 +225,8 @@ footer { margin-top: 30px; font-size: 12.5px; color: var(--ink-3); }
         <button type="button" data-v="eproc" aria-pressed="false"><span class="dot eproc"></span>eProc</button>
       </div>
     </label>
-    <label>Período
-      <div class="periodo"><input type="date" id="f-ini" aria-label="De"><span>até</span><input type="date" id="f-fim" aria-label="Até"></div>
-    </label>
-    <button class="btn link btn-limpar" id="btn-limpar" type="button">Limpar filtros</button>
+    <div class="filtro-info" id="filtro-info"></div>
   </section>
-  <div class="filtro-info" id="filtro-info"></div>
 
   <main id="conteudo"><div class="carregando">Consultando os painéis PJe e eProc no Qlik Sense…</div></main>
 
@@ -289,7 +283,7 @@ const GRUPOS = {
 
 // ===== Estado =====
 let D = null; // resposta do servidor
-const F = { sistema: 'ambos', ini: '', fim: '' };
+const F = { sistema: 'ambos' };
 const MESES_ABREV = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 const fmt = n => (n ?? 0).toLocaleString('pt-BR');
 const $ = s => document.querySelector(s);
@@ -305,10 +299,10 @@ function periodo() {
   const uPje = ult('pje'), uEproc = ult('eproc');
   const ultimo = [uPje, uEproc].filter(Boolean).sort().pop();
   if (!ultimo) return null;
-  const ini = F.ini || ultimo.slice(0, 8) + '01', fim = F.fim || ultimo;
+  const ini = ultimo.slice(0, 8) + '01', fim = ultimo;
   const txt = `${dataBRc(ini)} a ${dataBRc(fim)}`;
   // quando os sistemas param em datas diferentes, avisa (só faz sentido sem filtro "Até")
-  const difere = !F.fim && uPje && uEproc && uPje !== uEproc
+  const difere = uPje && uEproc && uPje !== uEproc
     ? `PJe com movimentações até ${dataBRc(uPje)}; eProc até ${dataBRc(uEproc)}` : '';
   return { ini, fim, txt, difere };
 }
@@ -325,10 +319,8 @@ function fonte(sis) {
 function fatosFiltrados(sis) {
   const s = fonte(sis); if (!s) return [];
   return s.fatos.filter(f =>
-    (!F.ini || f.data >= F.ini) && (!F.fim || f.data <= F.fim) &&
     MAPA[sis][f.metrica]);
 }
-function filtroAtivo() { return !!(F.ini || F.fim); }
 
 // Totais por chave canônica, por sistema
 function totais() {
@@ -383,30 +375,30 @@ function render() {
       ${det}</div>`;
   };
   const CARDS = [
-    { nome: 'Distribuições', ajuda: 'Processos distribuídos à vara no período, somando PJe e eProc. Não inclui recebidos de outro juízo, reativações, virtualizações nem a migração PJe → eProc (que aparecem à parte).', principal: ['dist'], extras: [['receb', 'Recebidos de outro juízo'], ['reativ', 'Reativações'], ['virt', 'Virtualizações']], extrasNome: 'Outras entradas', totalNome: 'Total de entradas' },
-    { nome: 'Baixas', ajuda: 'Baixas registradas no período, somando PJe e eProc. Não inclui remessas a outro juízo nem processos migrados do PJe para o eProc.', principal: ['baixa'], extras: [['remessa', 'Remessas a outro juízo']], extrasNome: 'Outras saídas', totalNome: 'Total de saídas' },
-    { nome: 'Julgamentos', ajuda: 'Sentenças registradas no período: julgamentos com mérito + sem mérito, somando PJe e eProc.', principal: ['jcm', 'jsm'], partes: [['jcm', 'Com mérito'], ['jsm', 'Sem mérito']] },
-    { nome: 'Decisões', ajuda: 'Decisões proferidas no período, somando PJe e eProc. Conta atos: um mesmo processo pode ter mais de uma decisão.', principal: ['decisao'] },
-    { nome: 'Despachos', ajuda: 'Despachos proferidos no período, somando PJe e eProc. Conta atos: um mesmo processo pode ter mais de um despacho.', principal: ['despacho'] },
+    { nome: 'Distribuições', ajuda: 'Processos distribuídos à vara no mês, somando PJe e eProc. Não inclui recebidos de outro juízo, reativações, virtualizações nem a migração PJe → eProc (que aparecem à parte).', principal: ['dist'], extras: [['receb', 'Recebidos de outro juízo'], ['reativ', 'Reativações'], ['virt', 'Virtualizações']], extrasNome: 'Outras entradas', totalNome: 'Total de entradas' },
+    { nome: 'Baixas', ajuda: 'Baixas registradas no mês, somando PJe e eProc. Não inclui remessas a outro juízo nem processos migrados do PJe para o eProc.', principal: ['baixa'], extras: [['remessa', 'Remessas a outro juízo']], extrasNome: 'Outras saídas', totalNome: 'Total de saídas' },
+    { nome: 'Julgamentos', ajuda: 'Sentenças registradas no mês: julgamentos com mérito + sem mérito, somando PJe e eProc.', principal: ['jcm', 'jsm'], partes: [['jcm', 'Com mérito'], ['jsm', 'Sem mérito']] },
+    { nome: 'Decisões', ajuda: 'Decisões proferidas no mês, somando PJe e eProc. Conta atos: um mesmo processo pode ter mais de uma decisão.', principal: ['decisao'] },
+    { nome: 'Despachos', ajuda: 'Despachos proferidos no mês, somando PJe e eProc. Conta atos: um mesmo processo pode ter mais de um despacho.', principal: ['despacho'] },
   ];
   const per = periodo();
   const perTxt = per ? `<b class="periodo-ref">${per.txt}</b>` : 'mês corrente';
-  html.push(secao('Movimentações da unidade', `${escopo} · ${perTxt}${filtroAtivo() ? ' · período filtrado' : ''}`,
+  html.push(secao('Movimentações da unidade', `${escopo} · ${perTxt}`,
     `<div class="grid kpis-principais">${CARDS.map(cardKpi).join('')}</div>`));
 
   // --- Indicadores complementares: audiências, migração (não somada) e acervo (exclusivo eProc)
   const migrOut = pje ? pje.migradosParaEproc : null;
   const migrIn = t.eproc.migrIn || 0;
-  const cardMigr = `<div class="card kpi"><div class="rot"><span class="rot-nome">Migração PJe → eProc${ajuda('Processos migrados do PJe para o eProc. São os mesmos processos vistos dos dois lados (saída no PJe, entrada no eProc), por isso não entram nas entradas nem nas saídas consolidadas. O PJe não informa a data da migração: o valor não muda com o filtro de período.')}</span><span class="tag">Indicador independente</span></div>
+  const cardMigr = `<div class="card kpi"><div class="rot"><span class="rot-nome">Migração PJe → eProc${ajuda('Processos migrados do PJe para o eProc. São os mesmos processos vistos dos dois lados (saída no PJe, entrada no eProc), por isso não entram nas entradas nem nas saídas consolidadas.')}</span><span class="tag">Indicador independente</span></div>
       <div class="val">${migrOut == null ? '—' : fmt(migrOut)}</div>
       <div class="det"><div><span>Saída “Migrado” no PJe</span><b>${migrOut == null ? '—' : fmt(migrOut)}</b></div>
-      <div><span>Entrada “Migrado” no eProc${filtroAtivo() ? ' (filtrado)' : ''}</span><b>${eproc ? fmt(migrIn) : '—'}</b></div></div>
+      <div><span>Entrada “Migrado” no eProc</span><b>${eproc ? fmt(migrIn) : '—'}</b></div></div>
       <div class="resumo">Transferência entre sistemas: não entra nas entradas e saídas consolidadas.</div></div>`;
-  const cardAcervo = `<div class="card kpi"><div class="rot"><span class="rot-nome">Acervo eProc${ajuda('Processos em tramitação no eProc na posição do dia anterior (critério do próprio painel do eProc). Não varia com o filtro de período. O painel do PJe não publica acervo.')}</span><span class="tag eproc">Exclusivo eProc</span></div>
+  const cardAcervo = `<div class="card kpi"><div class="rot"><span class="rot-nome">Acervo eProc${ajuda('Processos em tramitação no eProc na posição do dia anterior (critério do próprio painel do eProc). O painel do PJe não publica acervo.')}</span><span class="tag eproc">Exclusivo eProc</span></div>
       <div class="val">${eproc ? fmt(eproc.acervo) : '—'}</div>
-      <div class="resumo">Posição do dia anterior · não afetado pelos filtros</div></div>`;
+      <div class="resumo">Posição do dia anterior</div></div>`;
   html.push(secao('Indicadores complementares', '',
-    `<div class="grid kpis-compl">${cardKpi({ nome: 'Audiências', ajuda: 'Audiências realizadas no período, somando PJe e eProc.', principal: ['aud'] })}${cardMigr}${cardAcervo}</div>`));
+    `<div class="grid kpis-compl">${cardKpi({ nome: 'Audiências', ajuda: 'Audiências realizadas no mês, somando PJe e eProc.', principal: ['aud'] })}${cardMigr}${cardAcervo}</div>`));
 
   // --- Tabela comparativa
   const c = v => v == null ? '<td class="na">—</td>' : `<td>${fmt(v)}</td>`;
@@ -432,7 +424,7 @@ function render() {
     <tr class="sub"><td>Saídas no painel PJe (Baixa + Remessa + Migrado)</td>${c(pje ? soma(t.pje, GRUPOS.saidas.ks) + (migrOut || 0) : null)}${na}<td class="tot na">—</td><td class="trat">Referência</td></tr>
     <tr class="sub"><td>Distribuídos + Migrados no painel eProc</td>${na}${c(eproc ? (t.eproc.dist || 0) + migrIn : null)}<td class="tot na">—</td><td class="trat">Referência</td></tr>
     </tbody></table></div>`;
-  html.push(secao('Comparativo PJe × eProc', `contagem de movimentações · ${perTxt}${filtroAtivo() ? ' · período filtrado' : ''}`, tb, '<button class="btn btn-csv" id="btn-csv" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg><span>Baixar planilha (CSV)</span></button>'));
+  html.push(secao('Comparativo PJe × eProc', `contagem de movimentações · ${perTxt}`, tb, '<button class="btn btn-csv" id="btn-csv" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg><span>Baixar planilha (CSV)</span></button>'));
 
   // --- Gráficos
   html.push(`<div class="grid cols2 secao">
@@ -447,7 +439,7 @@ function render() {
   // --- Magistrados
 
   // --- Exclusivo eProc: histórico mensal
-  html.push(`<section class="secao"><div class="secao-tit"><h2><span class="dot eproc"></span>Histórico mensal — eProc</h2><span class="tag eproc">Exclusivo eProc</span><small>o app do PJe contém apenas o mês corrente · não afetado pelos filtros</small></div>
+  html.push(`<section class="secao"><div class="secao-tit"><h2><span class="dot eproc"></span>Histórico mensal — eProc</h2><span class="tag eproc">Exclusivo eProc</span><small>meses anteriores · o app do PJe contém apenas o mês corrente</small></div>
     <div class="card"><div class="chart-head"><label class="nota">Indicador <select id="g-hist">
       <option value="dist">Distribuição</option><option value="baixa">Baixa</option><option value="julg">Julgamentos</option><option value="migrIn">Migrado</option><option value="receb">Recebimento de outro juízo</option><option value="remessa">Remessa a outro juízo</option><option value="decisao">Decisão</option><option value="despacho">Despacho</option><option value="aud">Audiência</option></select></label></div>
     <div id="graf-hist"></div></div></section>`);
@@ -468,14 +460,14 @@ function render() {
   ligarGraficos();
 }
 
-// Exporta a tabela comparativa (mesmos números da tela, com o período aplicado) em CSV para Excel
+// Exporta a tabela comparativa (mesmos números da tela, mês corrente) em CSV para Excel
 function exportarCSV() {
   const t = totais(), pje = fonte('pje'), eproc = fonte('eproc'), per = periodo();
   const migrOut = pje ? pje.migradosParaEproc : null, migrIn = t.eproc.migrIn || 0;
   const cel = v => v == null ? '' : typeof v === 'number' ? String(v) : `"${String(v).replace(/"/g, '""')}"`;
   const linhas = [
     ['Movimentação Processual — 1ª Vara Cível da Comarca de Sete Lagoas (PJe + eProc)'],
-    ['Período', per ? per.txt + (filtroAtivo() ? ' (filtrado)' : '') : ''],
+    ['Período (mês corrente)', per ? per.txt : ''],
     ...(per && per.difere ? [['Observação', per.difere]] : []),
     ['Consulta ao Qlik Sense', new Date(D.consultadoEm).toLocaleString('pt-BR')],
     ['Última carga PJe', pje ? cargaBR(pje.atualizacaoQlik) : 'indisponível'],
@@ -646,8 +638,8 @@ function ligarGraficos() {
 function diasDoPeriodo() {
   const todas = ['pje', 'eproc'].flatMap(s => (fonte(s)?.fatos || []).map(f => f.data)).filter(Boolean).sort();
   if (!todas.length) return [];
-  const ini = F.ini || todas[0].slice(0, 8) + '01';
-  const fim = F.fim || todas[todas.length - 1];
+  const ini = todas[0].slice(0, 8) + '01';
+  const fim = todas[todas.length - 1];
   const out = []; let d = new Date(ini + 'T12:00:00');
   while (d.toISOString().slice(0, 10) <= fim && out.length < 62) { out.push(d.toISOString().slice(0, 10)); d.setDate(d.getDate() + 1); }
   return out;
@@ -684,32 +676,16 @@ function renderFontes() {
   $('#rodape').innerHTML = `Consulta ao Qlik Sense realizada em ${new Date(D.consultadoEm).toLocaleString('pt-BR')}. Ao recarregar a página ou clicar em “Atualizar dados”, uma nova consulta é feita se a anterior tiver mais de alguns minutos (para não sobrecarregar o Qlik). Os dados no Qlik são atualizados pelas cargas do TJMG; esta página não altera esses horários.`;
 }
 
-function prepararFiltros() {
-  const datas = ['pje', 'eproc'].flatMap(s => (fonte(s)?.fatos || []).map(f => f.data)).filter(Boolean).sort();
-  if (datas.length) {
-    const min = datas[0].slice(0, 8) + '01', max = datas[datas.length - 1];
-    for (const id of ['#f-ini', '#f-fim']) { $(id).min = min; $(id).max = max; }
-  }
-}
 function infoFiltro() {
   const per = periodo();
   if (!per) { $('#filtro-info').textContent = ''; return; }
-  const base = filtroAtivo()
-    ? `Período aplicado: ${per.txt} (filtrado). Migração do PJe e Acervo eProc não variam com o período.`
-    : `Período: ${per.txt} — mês corrente até a última movimentação registrada nas cargas do Qlik.`;
-  $('#filtro-info').innerHTML = esc(base) + (per.difere ? ` <span class="aviso-per">${esc(per.difere)}.</span>` : '');
+  $('#filtro-info').innerHTML = `Mês corrente: <b class="periodo-ref">${esc(per.txt)}</b><br><span>até a última movimentação nas cargas do Qlik</span>` + (per.difere ? ` <span class="aviso-per">${esc(per.difere)}.</span>` : '');
 }
 
 $('#f-sistema').addEventListener('click', ev => {
   const b = ev.target.closest('button'); if (!b) return;
   F.sistema = b.dataset.v; $('#f-sistema').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
   render();
-});
-$('#f-ini').addEventListener('change', e => { F.ini = e.target.value; infoFiltro(); render(); });
-$('#f-fim').addEventListener('change', e => { F.fim = e.target.value; infoFiltro(); render(); });
-$('#btn-limpar').addEventListener('click', () => {
-  Object.assign(F, { ini: '', fim: '' }); $('#f-ini').value = $('#f-fim').value = '';
-  infoFiltro(); render();
 });
 $('#btn-tema').addEventListener('click', () => {
   const r = document.documentElement, escuro = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
@@ -727,7 +703,7 @@ async function carregar() {
     const r = await fetch('/api/dados', { cache: 'no-store' });
     if (!r.ok) throw new Error('HTTP ' + r.status);
     D = await r.json();
-    renderFontes(); prepararFiltros(); infoFiltro(); render();
+    renderFontes(); infoFiltro(); render();
   } catch (e) {
     $('#conteudo').innerHTML = `<div class="alerta"><b>Não foi possível obter os dados.</b> ${location.protocol === 'file:'
       ? 'Esta página precisa ser aberta pelo servidor do dashboard (endereço publicado ou <code>Iniciar Dashboard.bat</code>), não diretamente como arquivo.'
