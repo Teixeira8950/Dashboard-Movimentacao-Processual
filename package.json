@@ -1,0 +1,13 @@
+{
+  "name": "dashboard-movimentacao-processual",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Dashboard unificado PJe + eProc da 1ª Vara Cível de Sete Lagoas, com dados lidos do Qlik Sense do TJMG",
+  "main": "servidor.js",
+  "scripts": {
+    "start": "node servidor.js"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

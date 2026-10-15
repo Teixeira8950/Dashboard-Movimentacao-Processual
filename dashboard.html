@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Movimentação Processual Unificada</title>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f3f4f6; --surface: #ffffff; --surface-2: #f1f2f4; --line: #dfe2e6; --line-soft: #eceef1;
+  --ink: #111315; --ink-2: #4b525a; --ink-3: #6f7781;
+  --pje: #2a78d6; --eproc: #e05f25; --total: #111315;
+  --accent: #9b2f45; --on-accent: #ffffff;
+  --ok: #0a8a0a; --warn: #fab219; --crit: #d03b3b; --cache: #a86d00;
+  --radius: 8px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #111315; --surface: #191c20; --surface-2: #20242a; --line: #30353b; --line-soft: #262a30;
+    --ink: #f2f4f6; --ink-2: #b4bac2; --ink-3: #8a929b;
+    --pje: #438fe8; --eproc: #e66a32; --total: #f2f4f6;
+    --accent: #d98298; --on-accent: #111315;
+    --ok: #3cc46b; --cache: #f0b33c;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #111315; --surface: #191c20; --surface-2: #20242a; --line: #30353b; --line-soft: #262a30;
+  --ink: #f2f4f6; --ink-2: #b4bac2; --ink-3: #8a929b;
+  --pje: #438fe8; --eproc: #e66a32; --total: #f2f4f6;
+  --accent: #d98298; --on-accent: #111315;
+  --ok: #3cc46b; --cache: #f0b33c;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.5 "Segoe UI", system-ui, -apple-system, Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 1360px; margin: 0 auto; padding: 22px 24px 48px; }
+code { font-size: 12px; }
+a { color: var(--pje); }
+
+/* ---------- Cabeçalho ---------- */
+header.top { display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--accent); padding-bottom: 16px; margin-bottom: 18px; }
+.eyebrow { font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+h1 { font-size: 26px; line-height: 1.2; margin: 4px 0 2px; font-weight: 650; letter-spacing: -.01em; }
+.sub { color: var(--ink-3); font-size: 13px; }
+.fontes { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.fonte { display: grid; grid-template-columns: auto auto; column-gap: 8px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 7px 12px; min-width: 150px; }
+.fonte .nome { font-weight: 650; font-size: 13px; display: flex; align-items: center; gap: 7px; }
+.fonte .st { font-size: 12px; font-weight: 600; justify-self: end; display: inline-flex; align-items: center; gap: 5px; }
+.fonte .st::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.fonte small { grid-column: 1 / -1; font-size: 11.5px; color: var(--ink-3); }
+.st.ok { color: var(--ok); } .st.err { color: var(--crit); } .st.cache { color: var(--cache); }
+.dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; flex: none; vertical-align: -1px; }
+.dot.pje { background: var(--pje); } .dot.eproc { background: var(--eproc); } .dot.total { background: var(--total); }
+button, select, input { font: inherit; color: inherit; }
+.btn { display: inline-flex; align-items: center; gap: 7px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius); padding: 8px 14px; cursor: pointer; font-weight: 600; font-size: 13px; }
+.btn:hover { border-color: var(--ink-3); }
+.btn svg { width: 15px; height: 15px; }
+.btn:disabled { opacity: .6; cursor: progress; }
+.btn:disabled svg { animation: girar 1s linear infinite; }
+@keyframes girar { to { transform: rotate(360deg); } }
+.btn.icone { padding: 8px 10px; color: var(--ink-3); }
+.btn.link { border-color: transparent; background: transparent; color: var(--ink-2); font-weight: 500; }
+.btn.link:hover { color: var(--ink); border-color: var(--line); }
+
+/* ---------- Filtros ---------- */
+.filtros { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 8px; position: sticky; top: 0; z-index: 5; box-shadow: 0 6px 16px -12px rgba(0,0,0,.5); }
+.filtros label { display: flex; flex-direction: column; gap: 5px; font-size: 11.5px; color: var(--ink-3); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+.filtros select, .filtros input { background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; padding: 6px 9px; height: 34px; text-transform: none; letter-spacing: 0; font-size: 13px; }
+.filtros select { min-width: 210px; }
+.periodo { display: flex; gap: 6px; align-items: center; }
+.periodo span { color: var(--ink-3); text-transform: none; letter-spacing: 0; font-weight: 400; }
+.filtros .btn-limpar { margin-left: auto; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; height: 34px; }
+.seg button { background: var(--surface-2); border: 0; padding: 0 14px; cursor: pointer; display: flex; gap: 7px; align-items: center; font-size: 13px; color: var(--ink-2); text-transform: none; letter-spacing: 0; font-weight: 500; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button:hover { color: var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); font-weight: 650; }
+.seg button[aria-pressed="true"] .dot.total { background: var(--bg); }
+.filtro-info { font-size: 12px; color: var(--ink-3); margin: 0 2px 6px; }
+
+.alertas:empty { display: none; }
+.alerta { border: 1px solid var(--line); border-left: 4px solid var(--crit); background: var(--surface); border-radius: var(--radius); padding: 10px 14px; margin-bottom: 10px; }
+.alerta.cache { border-left-color: var(--warn); }
+
+/* ---------- Seções ---------- */
+.secao { margin-top: 26px; }
+.secao-tit { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 0 0 12px; }
+h2 { font-size: 15px; margin: 0; font-weight: 650; display: inline-flex; gap: 8px; align-items: center; }
+.secao-tit small { color: var(--ink-3); font-size: 12.5px; }
+.grid { display: grid; gap: 14px; }
+
+/* ---------- Cards de indicadores ---------- */
+.kpis-principais { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.kpis-compl { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 1150px) { .kpis-principais { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .kpis-principais, .kpis-compl { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .kpis-principais, .kpis-compl { grid-template-columns: minmax(0, 1fr); } }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; min-width: 0; }
+.kpi { display: flex; flex-direction: column; }
+.kpi .rot { color: var(--ink-2); font-weight: 600; font-size: 13px; display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 22px; }
+.tag { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; padding: 2px 7px; border-radius: 4px; border: 1px solid var(--line); color: var(--ink-3); white-space: nowrap; }
+.tag.pje { color: var(--pje); border-color: color-mix(in srgb, var(--pje) 40%, transparent); }
+.tag.eproc { color: var(--eproc); border-color: color-mix(in srgb, var(--eproc) 40%, transparent); }
+.kpi .val { font-size: 40px; line-height: 1.05; font-weight: 700; letter-spacing: -.02em; margin: 10px 0 14px; font-variant-numeric: tabular-nums; }
+.split { display: flex; height: 10px; border-radius: 5px; overflow: hidden; gap: 2px; background: var(--surface-2); }
+.split span { display: block; height: 100%; min-width: 3px; }
+.split .p { background: var(--pje); } .split .e { background: var(--eproc); }
+.parts { display: flex; justify-content: space-between; gap: 8px; margin-top: 8px; font-size: 12.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.parts > span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.parts b { color: var(--ink); font-weight: 650; }
+.parts .pct { color: var(--ink-3); font-size: 11.5px; }
+.det { margin-top: auto; padding-top: 12px; display: grid; gap: 4px; font-size: 12px; color: var(--ink-3); }
+.det::before { content: ""; display: block; border-top: 1px solid var(--line-soft); margin-bottom: 6px; }
+.det div { display: flex; justify-content: space-between; gap: 8px; }
+.det b { color: var(--ink-2); font-weight: 600; font-variant-numeric: tabular-nums; }
+.det .tag { font-size: 9.5px; padding: 0 5px; margin-left: 4px; }
+.kpi .resumo { margin-top: auto; padding-top: 12px; font-size: 12px; color: var(--ink-3); border-top: 1px solid var(--line-soft); }
+.info { display: inline-flex; width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--line); color: var(--ink-3); font-size: 10.5px; font-weight: 700; align-items: center; justify-content: center; cursor: help; font-style: normal; }
+
+/* ---------- Tabelas ---------- */
+table { width: 100%; border-collapse: separate; border-spacing: 0; font-variant-numeric: tabular-nums; }
+th, td { padding: 10px 14px; text-align: right; border-bottom: 1px solid var(--line-soft); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; white-space: normal; }
+td[rowspan] { vertical-align: top; font-weight: 600; border-right: 1px solid var(--line-soft); }
+thead th { font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-3); font-weight: 600; background: var(--surface-2); position: sticky; top: 0; z-index: 1; border-bottom: 1px solid var(--line); }
+thead th .dot { margin-right: 4px; }
+tbody tr:hover td { background: color-mix(in srgb, var(--surface-2) 70%, transparent); }
+tr.grupo td { font-weight: 650; color: var(--ink); background: color-mix(in srgb, var(--surface-2) 55%, transparent); }
+tr.sub td:first-child { padding-left: 30px; color: var(--ink-2); }
+td.tot, th.tot { font-weight: 700; background: color-mix(in srgb, var(--accent) 7%, transparent); }
+thead th.tot { color: var(--ink); background: color-mix(in srgb, var(--accent) 14%, var(--surface-2)); }
+td.trat { color: var(--ink-3); font-size: 12.5px; text-align: left; }
+td.na { color: var(--ink-3); }
+tbody tr:last-child td { border-bottom: 0; }
+.tabwrap { overflow: auto; padding: 0; }
+.tabwrap.alta { max-height: 72vh; }
+.tabwrap > .nota { padding: 10px 14px; margin: 0; border-top: 1px solid var(--line-soft); }
+.nota { font-size: 12px; color: var(--ink-3); font-weight: 400; }
+.cols2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr)); }
+
+/* ---------- Gráficos ---------- */
+.chart-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 10px; }
+.chart-head select { background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; margin-left: 6px; }
+.chart-head .seg { height: 30px; }
+.legend { display: flex; gap: 16px; font-size: 12.5px; color: var(--ink-2); flex-wrap: wrap; margin-bottom: 4px; }
+.legend span { display: inline-flex; gap: 6px; align-items: center; }
+svg text { fill: var(--ink-3); font-size: 11px; }
+svg .lbl { fill: var(--ink-2); font-size: 11px; font-weight: 600; }
+.grid-l { stroke: var(--line-soft); stroke-width: 1; }
+.tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--bg); border-radius: 6px; padding: 8px 10px; font-size: 12.5px; z-index: 50; display: none; min-width: 150px; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+.tip div { display: flex; justify-content: space-between; gap: 14px; }
+.tip .t { font-weight: 650; margin-bottom: 4px; display: block; }
+
+.metodo { font-size: 13px; color: var(--ink-2); }
+.metodo ul { margin: 0; padding-left: 18px; }
+.metodo li { margin-bottom: 6px; }
+.carregando { padding: 60px 0; text-align: center; color: var(--ink-2); }
+footer { margin-top: 30px; font-size: 12px; color: var(--ink-3); }
+@media (max-width: 760px) {
+  .wrap { padding: 16px 16px 40px; }
+  h1 { font-size: 21px; } .kpi .val { font-size: 32px; }
+  .filtros { position: static; } .filtros .btn-limpar { margin-left: 0; }
+  .filtros select { min-width: 0; width: 100%; } .filtros label { flex: 1 1 100%; }
+  .fonte { flex: 1 1 140px; }
+  .filtros .seg button { flex: 1; justify-content: center; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">TJMG · Movimentação Processual · Mês corrente</div>
+      <h1>1ª Vara Cível da Comarca de Sete Lagoas</h1>
+      <div class="sub">Painel unificado PJe + eProc · dados consultados no Qlik Sense do TJMG</div>
+    </div>
+    <div class="fontes">
+      <div class="fonte" id="f-pje"><span class="nome"><span class="dot pje"></span>PJe</span><span class="st">…</span></div>
+      <div class="fonte" id="f-eproc"><span class="nome"><span class="dot eproc"></span>eProc</span><span class="st">…</span></div>
+      <button class="btn" id="btn-atualizar" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 4v5h-5"/></svg><span>Atualizar dados</span></button>
+      <button class="btn icone" id="btn-tema" type="button" title="Alternar tema claro/escuro" aria-label="Alternar tema claro/escuro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg></button>
+    </div>
+  </header>
+
+  <div id="alertas" class="alertas"></div>
+
+  <section class="filtros" aria-label="Filtros">
+    <label>Sistema
+      <div class="seg" id="f-sistema" role="group">
+        <button type="button" data-v="ambos" aria-pressed="true"><span class="dot total"></span>Consolidado</button>
+        <button type="button" data-v="pje" aria-pressed="false"><span class="dot pje"></span>PJe</button>
+        <button type="button" data-v="eproc" aria-pressed="false"><span class="dot eproc"></span>eProc</button>
+      </div>
+    </label>
+    <label>Período
+      <div class="periodo"><input type="date" id="f-ini" aria-label="De"><span>até</span><input type="date" id="f-fim" aria-label="Até"></div>
+    </label>
+    <label>Magistrado(a) <select id="f-mag"><option value="">Todos</option></select></label>
+    <button class="btn link btn-limpar" id="btn-limpar" type="button">Limpar filtros</button>
+  </section>
+  <div class="filtro-info" id="filtro-info"></div>
+
+  <main id="conteudo"><div class="carregando">Consultando os painéis PJe e eProc no Qlik Sense…</div></main>
+
+  <footer id="rodape"></footer>
+</div>
+<div class="tip" id="tip"></div>
+
+<script>
+// ===== Definição dos indicadores =====
+// Cada métrica do Qlik é mapeada para uma chave canônica. Só são somadas métricas
+// com o mesmo significado nos dois sistemas (mesma unidade, mesmo mês, contagem de eventos).
+const MAPA = {
+  pje: {
+    'Distribuição': 'dist', 'Recebimento outro juízo': 'receb', 'Reativação': 'reativ', 'Virtualização': 'virt',
+    'Baixa': 'baixa', 'Remessa outro juízo': 'remessa',
+    'Julgamento com Mérito': 'jcm', 'Julgamento sem Mérito': 'jsm',
+    'Decisão': 'decisao', 'Despacho': 'despacho', 'Audiência': 'aud',
+    'Sessão de Julgamento': 'sessao', 'Tribunal do Júri': 'juri', 'Sessão Restaurativa': 'restaur',
+  },
+  eproc: {
+    'Distribuição': 'dist', 'Recebimento outro juízo': 'receb', 'Reativação': 'reativ',
+    'Baixa': 'baixa', 'Remessa a outro juízo': 'remessa',
+    'Julgamento com Mérito': 'jcm', 'Julgamento sem Mérito': 'jsm',
+    'Decisão': 'decisao', 'Despacho': 'despacho', 'Audiência': 'aud',
+    'Migrado': 'migrIn', 'Conclusão': 'conclusao',
+  },
+};
+// tipo: 'soma' = consolidado; 'pje'/'eproc' = exclusivo; 'transf' = transferência interna (não somada)
+const METRICAS = [
+  { k: 'dist', nome: 'Distribuição', grupo: 'Entradas', tipo: 'soma' },
+  { k: 'receb', nome: 'Recebimento de outro juízo', grupo: 'Entradas', tipo: 'soma' },
+  { k: 'reativ', nome: 'Reativação', grupo: 'Entradas', tipo: 'soma' },
+  { k: 'virt', nome: 'Virtualização', grupo: 'Entradas', tipo: 'pje' },
+  { k: 'baixa', nome: 'Baixa', grupo: 'Saídas', tipo: 'soma' },
+  { k: 'remessa', nome: 'Remessa a outro juízo', grupo: 'Saídas', tipo: 'soma' },
+  { k: 'jcm', nome: 'Julgamento com mérito', grupo: 'Julgamentos', tipo: 'soma' },
+  { k: 'jsm', nome: 'Julgamento sem mérito', grupo: 'Julgamentos', tipo: 'soma' },
+  { k: 'decisao', nome: 'Decisão', grupo: 'Atos judiciais', tipo: 'soma' },
+  { k: 'despacho', nome: 'Despacho', grupo: 'Atos judiciais', tipo: 'soma' },
+  { k: 'aud', nome: 'Audiência', grupo: 'Audiências e sessões', tipo: 'soma' },
+  { k: 'sessao', nome: 'Sessão de Julgamento', grupo: 'Audiências e sessões', tipo: 'pje' },
+  { k: 'juri', nome: 'Tribunal do Júri', grupo: 'Audiências e sessões', tipo: 'pje' },
+  { k: 'restaur', nome: 'Sessão Restaurativa', grupo: 'Audiências e sessões', tipo: 'pje' },
+  { k: 'conclusao', nome: 'Conclusão', grupo: 'Outros (eProc)', tipo: 'eproc', nota: 'existe na base do eProc, mas não é exibida no painel original' },
+];
+const GRUPOS = {
+  entradas: { nome: 'Entradas', ks: ['dist', 'receb', 'reativ', 'virt'] },
+  saidas: { nome: 'Saídas', ks: ['baixa', 'remessa'] },
+  julg: { nome: 'Julgamentos', ks: ['jcm', 'jsm'] },
+  decisao: { nome: 'Decisões', ks: ['decisao'] },
+  despacho: { nome: 'Despachos', ks: ['despacho'] },
+  aud: { nome: 'Audiências', ks: ['aud'] },
+};
+
+// ===== Estado =====
+let D = null; // resposta do servidor
+const F = { sistema: 'ambos', ini: '', fim: '', mag: '' };
+const MESES_ABREV = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+const fmt = n => (n ?? 0).toLocaleString('pt-BR');
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const normNome = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().trim();
+const cargaBR = t => { const m = String(t || '').match(/^(\d{4})-(\d{2})-(\d{2})(.*)$/); return m ? `${m[3]}/${m[2]}/${m[1]}${m[4]}` : String(t || ''); };
+const dataBR = iso => iso ? iso.slice(8, 10) + '/' + iso.slice(5, 7) : '';
+
+// Fonte efetiva de cada sistema: consulta atual ou, se falhou, a última válida (sinalizada)
+function fonte(sis) {
+  const s = D && D[sis];
+  if (!s) return null;
+  if (s.ok) return { ...s, emCache: false };
+  if (s.ultimaConsultaValida) return { ...s.ultimaConsultaValida, emCache: true, erro: s.erro };
+  return null;
+}
+
+function fatosFiltrados(sis) {
+  const s = fonte(sis); if (!s) return [];
+  return s.fatos.filter(f =>
+    (!F.ini || f.data >= F.ini) && (!F.fim || f.data <= F.fim) &&
+    (!F.mag || normNome(f.magistrado) === F.mag) && MAPA[sis][f.metrica]);
+}
+function filtroAtivo() { return !!(F.ini || F.fim || F.mag); }
+
+// Totais por chave canônica, por sistema
+function totais() {
+  const t = { pje: {}, eproc: {} };
+  for (const sis of ['pje', 'eproc']) for (const f of fatosFiltrados(sis)) {
+    const k = MAPA[sis][f.metrica]; t[sis][k] = (t[sis][k] || 0) + f.qtd;
+  }
+  return t;
+}
+const soma = (o, ks) => ks.reduce((a, k) => a + (o[k] || 0), 0);
+const usa = sis => F.sistema === 'ambos' || F.sistema === sis;
+
+// ===== Renderização =====
+function render() {
+  if (!D) return;
+  const pje = fonte('pje'), eproc = fonte('eproc');
+  const t = totais();
+  const html = [];
+
+  // --- KPIs principais
+  const escopo = F.sistema === 'ambos' ? 'PJe + eProc' : F.sistema === 'pje' ? 'Somente PJe' : 'Somente eProc';
+  const secao = (titulo, sub, corpo, extra = '') => `<section class="secao"><div class="secao-tit"><h2>${titulo}</h2>${sub ? `<small>${sub}</small>` : ''}${extra}</div>${corpo}</section>`;
+  const cardGrupo = g => {
+    const p = usa('pje') ? soma(t.pje, g.ks) : 0, e = usa('eproc') ? soma(t.eproc, g.ks) : 0, tot = p + e;
+    const pct = v => F.sistema === 'ambos' && tot ? ` <span class="pct">${Math.round(v / tot * 100)}%</span>` : '';
+    const det = g.ks.length > 1 ? `<div class="det">${g.ks.map(k => {
+      const m = METRICAS.find(x => x.k === k);
+      const v = (usa('pje') ? t.pje[k] || 0 : 0) + (usa('eproc') ? t.eproc[k] || 0 : 0);
+      return `<div><span>${m.nome}${m.tipo === 'pje' ? '<span class="tag pje">Exclusivo PJe</span>' : ''}</span><b>${fmt(v)}</b></div>`;
+    }).join('')}</div>` : '';
+    return `<div class="card kpi"><div class="rot"><span>${g.nome}</span></div>
+      <div class="val">${fmt(tot)}</div>
+      ${barraSplit(p, e)}
+      <div class="parts"><span><span class="dot pje"></span>PJe <b>${usa('pje') ? fmt(p) : '—'}</b>${pct(p)}</span><span>eProc <b>${usa('eproc') ? fmt(e) : '—'}</b>${pct(e)}<span class="dot eproc"></span></span></div>
+      ${det}</div>`;
+  };
+  html.push(secao('Movimentações da unidade', `${escopo} · mês corrente${filtroAtivo() ? ' · com filtros aplicados' : ''}`,
+    `<div class="grid kpis-principais">${['entradas', 'saidas', 'julg', 'decisao', 'despacho'].map(k => cardGrupo(GRUPOS[k])).join('')}</div>`));
+
+  // --- Indicadores complementares: audiências, migração (não somada) e acervo (exclusivo eProc)
+  const migrOut = pje ? pje.migradosParaEproc : null;
+  const migrIn = t.eproc.migrIn || 0;
+  const cardMigr = `<div class="card kpi"><div class="rot"><span>Migração PJe → eProc</span><span class="tag">Indicador independente</span></div>
+      <div class="val">${migrOut == null ? '—' : fmt(migrOut)}</div>
+      <div class="det"><div><span>Saída “Migrado” no PJe</span><b>${migrOut == null ? '—' : fmt(migrOut)}</b></div>
+      <div><span>Entrada “Migrado” no eProc${filtroAtivo() ? ' (filtrado)' : ''}</span><b>${eproc ? fmt(migrIn) : '—'}</b></div></div>
+      <div class="resumo">Transferência entre sistemas: não entra nas entradas e saídas consolidadas.</div></div>`;
+  const cardAcervo = `<div class="card kpi"><div class="rot"><span>Acervo eProc <i class="info" title="Processos em acervo no eProc, posição do dia anterior. Não varia com os filtros de período ou magistrado. O painel do PJe não publica acervo.">i</i></span><span class="tag eproc">Exclusivo eProc</span></div>
+      <div class="val">${eproc ? fmt(eproc.acervo) : '—'}</div>
+      <div class="resumo">Posição do dia anterior · não afetado pelos filtros</div></div>`;
+  html.push(secao('Indicadores complementares', '',
+    `<div class="grid kpis-compl">${cardGrupo(GRUPOS.aud)}${cardMigr}${cardAcervo}</div>`));
+
+  // --- Tabela comparativa
+  const c = v => v == null ? '<td class="na">—</td>' : `<td>${fmt(v)}</td>`;
+  const na = '<td class="na">n/a</td>';
+  let tb = `<div class="card tabwrap alta"><table><thead><tr><th>Indicador</th><th><span class="dot pje"></span>PJe</th><th><span class="dot eproc"></span>eProc</th><th class="tot">Total consolidado</th><th style="text-align:left">Tratamento</th></tr></thead><tbody>`;
+  let grupoAtual = '';
+  for (const m of METRICAS) {
+    if (m.grupo !== grupoAtual) {
+      grupoAtual = m.grupo;
+      const g = Object.values(GRUPOS).find(x => x.nome === m.grupo && x.ks.length > 1);
+      tb += g
+        ? `<tr class="grupo"><td>${m.grupo}</td>${c(pje ? soma(t.pje, g.ks) : null)}${c(eproc ? soma(t.eproc, g.ks) : null)}<td class="tot">${fmt(soma(t.pje, g.ks) + soma(t.eproc, g.ks))}</td><td class="trat"></td></tr>`
+        : `<tr class="grupo"><td colspan="3">${m.grupo}</td><td class="tot"></td><td class="trat"></td></tr>`;
+    }
+    const p = t.pje[m.k] || 0, e = t.eproc[m.k] || 0;
+    const trat = { soma: 'Somado', pje: 'Exclusivo PJe', eproc: 'Exclusivo eProc' }[m.tipo];
+    tb += `<tr class="sub"><td>${m.nome}${m.nota ? `<div class="nota">${m.nota}</div>` : ''}</td>
+      ${m.tipo === 'eproc' ? na : c(pje ? p : null)}${m.tipo === 'pje' ? na : c(eproc ? e : null)}
+      <td class="tot">${fmt(p + e)}</td><td class="trat">${trat}</td></tr>`;
+  }
+  tb += `<tr class="grupo"><td colspan="3">Transferência entre sistemas e totais dos painéis originais</td><td class="tot"></td><td class="trat"></td></tr>
+    <tr class="sub"><td>Migrado (saída do PJe / entrada no eProc)<div class="nota">o PJe não informa a data da migração: valor não é afetado pelos filtros</div></td>${c(migrOut)}${c(eproc ? migrIn : null)}<td class="tot na">—</td><td class="trat">Não somado</td></tr>
+    <tr class="sub"><td>Saídas no painel PJe (Baixa + Remessa + Migrado)</td>${c(pje ? soma(t.pje, GRUPOS.saidas.ks) + (migrOut || 0) : null)}${na}<td class="tot na">—</td><td class="trat">Referência</td></tr>
+    <tr class="sub"><td>Distribuídos + Migrados no painel eProc</td>${na}${c(eproc ? (t.eproc.dist || 0) + migrIn : null)}<td class="tot na">—</td><td class="trat">Referência</td></tr>
+    </tbody></table></div>`;
+  html.push(secao('Comparativo PJe × eProc', `contagem de movimentações no mês${filtroAtivo() ? ' · com filtros' : ''}`, tb));
+
+  // --- Gráficos
+  html.push(`<div class="grid cols2 secao">
+    <section class="secao" style="margin-top:0"><div class="secao-tit"><h2>Evolução diária no mês</h2></div><div class="card">
+      <div class="chart-head"><label class="nota">Indicador <select id="g-dia">${Object.entries(GRUPOS).map(([k, g]) => `<option value="${k}">${g.nome}</option>`).join('')}${METRICAS.map(m => `<option value="m:${m.k}">· ${m.nome}</option>`).join('')}</select></label>
+      <div class="seg" id="g-modo"><button type="button" data-v="dia" aria-pressed="true">Diário</button><button type="button" data-v="acum" aria-pressed="false">Acumulado</button></div></div>
+      <div class="legend">${usa('pje') ? '<span><span class="dot pje"></span>PJe</span>' : ''}${usa('eproc') ? '<span><span class="dot eproc"></span>eProc</span>' : ''}</div>
+      <div id="graf-dia"></div></div></section>
+    <section class="secao" style="margin-top:0"><div class="secao-tit"><h2>Composição por indicador</h2><small>PJe e eProc lado a lado</small></div><div class="card"><div id="graf-comp"></div></div></section>
+  </div>`);
+
+  // --- Magistrados
+  html.push(secao('Por magistrado(a)', 'movimentações do mês por sistema', '<div class="card tabwrap" id="tab-mag"></div>'));
+
+  // --- Exclusivo eProc: histórico mensal
+  html.push(`<section class="secao"><div class="secao-tit"><h2><span class="dot eproc"></span>Histórico mensal — eProc</h2><span class="tag eproc">Exclusivo eProc</span><small>o app do PJe contém apenas o mês corrente · não afetado pelos filtros</small></div>
+    <div class="card"><div class="chart-head"><label class="nota">Indicador <select id="g-hist">
+      <option value="dist">Distribuição</option><option value="baixa">Baixa</option><option value="julg">Julgamentos</option><option value="migrIn">Migrado</option><option value="receb">Recebimento de outro juízo</option><option value="remessa">Remessa a outro juízo</option><option value="decisao">Decisão</option><option value="despacho">Despacho</option><option value="aud">Audiência</option></select></label></div>
+    <div id="graf-hist"></div></div></section>`);
+
+  // --- Metodologia
+  html.push(`<section class="secao"><div class="secao-tit"><h2>Origem dos dados e critérios</h2></div><div class="card metodo"><ul>
+    <li><span class="dot pje"></span> <b>PJe</b>: app Qlik “Movimentação Processual – Mês Corrente”, pasta “Visão Geral – Mês Atual”; seleções ${seleTxt(pje)}. Mesmas fórmulas do painel: <code>Count(Processo)</code> por Métrica; Migrado = <code>count(Processo_EPROC_Migrado)</code>. ${pje ? 'Última atualização da carga no Qlik: <b>' + esc(cargaBR(pje.atualizacaoQlik)) + '</b>.' : ''} ${pje ? `<a href="${pje.painel}" target="_blank" rel="noopener">Abrir painel original</a>` : ''}</li>
+    <li><span class="dot eproc"></span> <b>eProc</b>: app Qlik do eProc, pasta “Gráficos”; seleções ${seleTxt(eproc)}. Mesmas fórmulas da tabela dinâmica do painel: <code>Count(1)</code> por Métrica_EPROC. Acervo = <code>Count({&lt;ACERVO={'1'}&gt;} DISTINCT Processo_EPROC)</code>, só com a unidade selecionada (o painel avisa que o acervo não depende de mês/ano). ${eproc ? 'Última carga no Qlik: <b>' + esc(eproc.atualizacaoQlik) + '</b>.' : ''} ${eproc ? `<a href="${eproc.painel}" target="_blank" rel="noopener">Abrir painel original</a>` : ''}</li>
+    <li><b>Consolidação</b>: somam-se apenas métricas equivalentes nos dois sistemas (mesma unidade, mesmo mês, contagem de movimentações por tipo). Os campos “Sistema” do app PJe contêm apenas PJe/PJe TR, portanto não há sobreposição com o eProc.</li>
+    <li><b>Migração PJe → eProc</b> é o mesmo conjunto de processos visto dos dois lados (saída no PJe, entrada no eProc). Para não contar duas vezes nem inflar entradas/saídas, ela fica fora dos totais consolidados e aparece em separado.</li>
+    <li>Os indicadores contam <b>movimentações</b> (eventos), como nos painéis originais — um processo com dois despachos conta duas vezes.</li>
+    <li>“Recebimento de outro juízo” e “Remessa a outro juízo” seguem a classificação de cada sistema; eventuais redistribuições entre PJe e eProc além da migração não são identificáveis nos painéis.</li>
+  </ul></div></section>`);
+
+  $('#conteudo').innerHTML = html.join('');
+  ligarGraficos();
+}
+
+function barraSplit(p, e) {
+  // flex-grow proporcional aos valores: a divisão visual corresponde exatamente a PJe/eProc
+  if (!(p + e)) return '<div class="split"></div>';
+  return `<div class="split" role="img" aria-label="PJe ${p}, eProc ${e}">${p ? `<span class="p" style="flex:${p} 1 0"></span>` : ''}${e ? `<span class="e" style="flex:${e} 1 0"></span>` : ''}</div>`;
+}
+function seleTxt(s) { return s ? Object.entries(s.selecoes).map(([k, v]) => `<code>${esc(k)} = ${esc(v)}</code>`).join(', ') : '(indisponível)'; }
+
+// ===== Gráficos SVG =====
+const tip = $('#tip');
+function mostrarTip(ev, titulo, linhas) {
+  tip.innerHTML = `<span class="t">${esc(titulo)}</span>` + linhas.map(([cor, n, v]) => `<div><span>${cor ? `<span class="dot" style="background:${cor}"></span> ` : ''}${esc(n)}</span><b>${fmt(v)}</b></div>`).join('');
+  tip.style.display = 'block';
+  const x = Math.min(ev.clientX + 14, innerWidth - tip.offsetWidth - 8), y = Math.min(ev.clientY + 14, innerHeight - tip.offsetHeight - 8);
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+}
+function esconderTip() { tip.style.display = 'none'; }
+const cor = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+function escala(max) { // passo "bonito" para o eixo
+  if (max <= 0) return { top: 5, step: 1 };
+  const raw = max / 4, mag = 10 ** Math.floor(Math.log10(raw));
+  const step = [1, 2, 2.5, 5, 10].map(m => m * mag).find(s => s >= raw);
+  return { top: Math.ceil(max / step) * step, step };
+}
+
+// Barras empilhadas (PJe embaixo, eProc em cima) por categoria
+function barrasEmpilhadas(el, cats, series, opts = {}) {
+  const W = Math.max(el.clientWidth, 300), H = opts.h || 260, m = { t: 18, r: 8, b: 30, l: 38 };
+  const iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const tots = cats.map((_, i) => series.reduce((a, s) => a + s.v[i], 0));
+  const { top, step } = escala(Math.max(...tots, 0));
+  const y = v => m.t + ih - v / top * ih;
+  const bw = iw / cats.length, barW = Math.max(4, Math.min(34, bw * .62));
+  let s = `<svg width="${W}" height="${H}" role="img" aria-label="${esc(opts.aria || '')}">`;
+  for (let v = 0; v <= top; v += step) s += `<line class="grid-l" x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}"/><text x="${m.l - 6}" y="${y(v) + 4}" text-anchor="end">${fmt(v)}</text>`;
+  const pular = Math.ceil(cats.length / Math.floor(iw / 42));
+  cats.forEach((c, i) => {
+    const cx = m.l + bw * i + bw / 2;
+    let base = 0;
+    const segs = series.filter(sr => sr.v[i] > 0);
+    segs.forEach((sr, j) => {
+      const y0 = y(base), y1 = y(base + sr.v[i]);
+      const h = Math.max(0, y0 - y1 - (j > 0 ? 2 : 0));
+      const ultimo = j === segs.length - 1;
+      const r = ultimo ? Math.min(4, h / 2, barW / 2) : 0;
+      // retângulo com cantos arredondados só no topo do último segmento
+      s += `<path fill="${sr.cor}" d="M${cx - barW / 2},${y0 - (j > 0 ? 2 : 0)} V${y1 + r} Q${cx - barW / 2},${y1} ${cx - barW / 2 + r},${y1} H${cx + barW / 2 - r} Q${cx + barW / 2},${y1} ${cx + barW / 2},${y1 + r} V${y0 - (j > 0 ? 2 : 0)} Z"/>`;
+      base += sr.v[i];
+    });
+    if (opts.rotuloTotal && tots[i] > 0 && cats.length <= 16) s += `<text class="lbl" x="${cx}" y="${y(tots[i]) - 5}" text-anchor="middle">${fmt(tots[i])}</text>`;
+    if (i % pular === 0) s += `<text x="${cx}" y="${H - 10}" text-anchor="middle">${esc(opts.rotulo ? opts.rotulo(c) : c)}</text>`;
+    s += `<rect x="${m.l + bw * i}" y="${m.t}" width="${bw}" height="${ih}" fill="transparent" data-i="${i}"/>`;
+  });
+  s += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(0)}" y2="${y(0)}" stroke="${cor('--ink-3')}"/></svg>`;
+  el.innerHTML = s;
+  el.querySelectorAll('rect[data-i]').forEach(r => {
+    const i = +r.dataset.i;
+    r.addEventListener('mousemove', ev => mostrarTip(ev, opts.titulo ? opts.titulo(cats[i]) : cats[i], [...series.map(sr => [sr.cor, sr.nome, sr.v[i]]), ...(series.length > 1 ? [['', 'Total', tots[i]]] : [])]));
+    r.addEventListener('mouseleave', esconderTip);
+  });
+}
+
+// Barras horizontais agrupadas (comparativo por indicador)
+function barrasHorizontais(el, linhas, series) {
+  const W = Math.max(el.clientWidth, 300), lh = series.length * 14 + 14, m = { t: 6, r: 44, l: Math.min(190, W * .42) };
+  const H = m.t + linhas.length * lh + 6, iw = W - m.l - m.r;
+  const max = Math.max(1, ...linhas.flatMap(l => series.map(s => l.v[s.k] || 0)));
+  let s = `<svg width="${W}" height="${H}" role="img" aria-label="Comparativo por indicador">`;
+  linhas.forEach((l, i) => {
+    const y0 = m.t + i * lh;
+    s += `<text x="${m.l - 8}" y="${y0 + lh / 2 + 2}" text-anchor="end" class="lbl">${esc(l.nome)}</text>`;
+    series.forEach((sr, j) => {
+      const v = l.v[sr.k] || 0, w = v / max * iw, yy = y0 + 6 + j * 14;
+      if (v > 0) s += `<path fill="${sr.cor}" d="M${m.l},${yy} H${m.l + w - Math.min(4, w / 2)} Q${m.l + w},${yy} ${m.l + w},${yy + Math.min(4, w / 2)} V${yy + 12 - Math.min(4, w / 2)} Q${m.l + w},${yy + 12} ${m.l + w - Math.min(4, w / 2)},${yy + 12} H${m.l} Z"/>`;
+      s += `<text x="${m.l + w + 5}" y="${yy + 10}">${l.na && l.na[sr.k] ? 'n/a' : fmt(v)}</text>`;
+    });
+    s += `<rect x="0" y="${y0}" width="${W}" height="${lh}" fill="transparent" data-i="${i}"/>`;
+  });
+  s += `<line x1="${m.l}" x2="${m.l}" y1="${m.t}" y2="${H - 6}" stroke="${cor('--ink-3')}"/></svg>`;
+  el.innerHTML = s;
+  el.querySelectorAll('rect[data-i]').forEach(r => {
+    const l = linhas[+r.dataset.i];
+    r.addEventListener('mousemove', ev => mostrarTip(ev, l.nome, series.map(sr => [sr.cor, sr.nome, l.v[sr.k] || 0])));
+    r.addEventListener('mouseleave', esconderTip);
+  });
+}
+
+function ligarGraficos() {
+  const serieDef = [];
+  if (usa('pje') && fonte('pje')) serieDef.push({ sis: 'pje', nome: 'PJe', cor: cor('--pje') });
+  if (usa('eproc') && fonte('eproc')) serieDef.push({ sis: 'eproc', nome: 'eProc', cor: cor('--eproc') });
+
+  // --- diário
+  const desenharDia = () => {
+    const sel = $('#g-dia').value, acum = $('#g-modo [aria-pressed="true"]').dataset.v === 'acum';
+    const ks = sel.startsWith('m:') ? [sel.slice(2)] : GRUPOS[sel].ks;
+    const dias = diasDoPeriodo();
+    const series = serieDef.map(sd => {
+      const porDia = {};
+      for (const f of fatosFiltrados(sd.sis)) if (ks.includes(MAPA[sd.sis][f.metrica])) porDia[f.data] = (porDia[f.data] || 0) + f.qtd;
+      let ac = 0;
+      return { ...sd, v: dias.map(d => acum ? (ac += porDia[d] || 0) : porDia[d] || 0) };
+    });
+    const nome = sel.startsWith('m:') ? METRICAS.find(m => m.k === sel.slice(2)).nome : GRUPOS[sel].nome;
+    barrasEmpilhadas($('#graf-dia'), dias, series, { rotulo: dataBR, titulo: d => `${nome} · ${d.split('-').reverse().join('/')}${acum ? ' (acumulado)' : ''}`, aria: `${nome} por dia` });
+  };
+  $('#g-dia').onchange = desenharDia;
+  $('#g-modo').onclick = ev => { const b = ev.target.closest('button'); if (!b) return; $('#g-modo').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); desenharDia(); };
+  desenharDia();
+
+  // --- composição
+  const t = totais();
+  const linhas = METRICAS.filter(m => m.k !== 'conclusao').map(m => ({ nome: m.nome, v: { pje: t.pje[m.k] || 0, eproc: t.eproc[m.k] || 0 }, na: { pje: m.tipo === 'eproc', eproc: m.tipo === 'pje' } }));
+  barrasHorizontais($('#graf-comp'), linhas, serieDef.map(s => ({ k: s.sis, nome: s.nome, cor: s.cor })));
+
+  // --- magistrados
+  const mags = {};
+  for (const sd of [{ sis: 'pje' }, { sis: 'eproc' }]) if (usa(sd.sis)) for (const f of fatosFiltrados(sd.sis)) {
+    const k = MAPA[sd.sis][f.metrica]; if (k === 'migrIn' || k === 'conclusao') continue;
+    const n = normNome(f.magistrado);
+    mags[n] ??= { nome: f.magistrado, pje: {}, eproc: {} };
+    mags[n][sd.sis][k] = (mags[n][sd.sis][k] || 0) + f.qtd;
+  }
+  const cols = Object.entries(GRUPOS);
+  const sisList = ['pje', 'eproc'].filter(usa);
+  let tb = `<table><thead><tr><th>Magistrado(a)</th><th>Sistema</th>${cols.map(([, g]) => `<th>${g.nome}</th>`).join('')}</tr></thead><tbody>`;
+  const ordem = Object.values(mags).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+  if (!ordem.length) tb += `<tr><td colspan="${cols.length + 2}">Sem movimentações para os filtros selecionados.</td></tr>`;
+  for (const mg of ordem) {
+    const rows = sisList.map(s => [s, mg[s]]).filter(([, o]) => Object.keys(o).length);
+    rows.forEach(([s, o], i) => {
+      tb += `<tr>${i === 0 ? `<td rowspan="${rows.length + (rows.length > 1 ? 1 : 0)}">${esc(mg.nome)}</td>` : ''}<td><span class="dot ${s}"></span> ${s === 'pje' ? 'PJe' : 'eProc'}</td>${cols.map(([, g]) => `<td>${fmt(soma(o, g.ks))}</td>`).join('')}</tr>`;
+    });
+    if (rows.length > 1) tb += `<tr><td class="tot">Total</td>${cols.map(([, g]) => `<td class="tot">${fmt(soma(mg.pje, g.ks) + soma(mg.eproc, g.ks))}</td>`).join('')}</tr>`;
+  }
+  $('#tab-mag').innerHTML = tb + '</tbody></table><p class="nota">Nomes de magistrados unificados entre os sistemas ignorando acentos e maiúsculas. Migração e Conclusão não entram nesta tabela.</p>';
+
+  // --- histórico eProc
+  const desenharHist = () => {
+    const e = fonte('eproc');
+    if (!e) { $('#graf-hist').innerHTML = '<p class="nota">eProc indisponível.</p>'; return; }
+    const sel = $('#g-hist').value, ks = sel === 'julg' ? GRUPOS.julg.ks : [sel];
+    const meses = [...new Map(e.historico.map(h => [h.mes, h.ord])).entries()].sort((a, b) => a[1] - b[1]).slice(-13).map(x => x[0]);
+    const v = meses.map(mm => e.historico.filter(h => h.mes === mm && ks.includes(MAPA.eproc[h.metrica])).reduce((a, h) => a + h.qtd, 0));
+    const rot = mm => { const [a, mes] = mm.split('/'); return mes + '/' + a.slice(2); };
+    barrasEmpilhadas($('#graf-hist'), meses, [{ nome: 'eProc', cor: cor('--eproc'), v }], { rotulo: rot, titulo: mm => mm + (mm === e.mes ? ' (mês em curso)' : ''), rotuloTotal: true, h: 240, aria: 'Histórico mensal eProc' });
+  };
+  $('#g-hist').onchange = desenharHist;
+  desenharHist();
+}
+
+function diasDoPeriodo() {
+  const todas = ['pje', 'eproc'].flatMap(s => (fonte(s)?.fatos || []).map(f => f.data)).filter(Boolean).sort();
+  if (!todas.length) return [];
+  const ini = F.ini || todas[0].slice(0, 8) + '01';
+  const fim = F.fim || todas[todas.length - 1];
+  const out = []; let d = new Date(ini + 'T12:00:00');
+  while (d.toISOString().slice(0, 10) <= fim && out.length < 62) { out.push(d.toISOString().slice(0, 10)); d.setDate(d.getDate() + 1); }
+  return out;
+}
+
+// ===== Cabeçalho, alertas e filtros =====
+function renderFontes() {
+  const al = [];
+  for (const sis of ['pje', 'eproc']) {
+    const el = $('#f-' + sis), st = el.querySelector('.st'), s = D[sis], nome = sis === 'pje' ? 'PJe' : 'eProc';
+    el.querySelectorAll('a,small').forEach(x => x.remove());
+    if (s.ok) {
+      st.className = 'st ok'; st.textContent = 'ao vivo';
+      el.insertAdjacentHTML('beforeend', `<small>Última carga: ${esc(cargaBR(s.atualizacaoQlik))}</small>`);
+    } else if (s.ultimaConsultaValida) {
+      st.className = 'st cache'; st.textContent = 'desatualizado';
+      el.insertAdjacentHTML('beforeend', `<small>Consulta de ${new Date(s.ultimaConsultaValida.consultadoEm).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}</small>`);
+      al.push(`<div class="alerta cache"><b>${nome}: não foi possível consultar o Qlik agora</b> (${esc(s.erro)}). Exibindo a última consulta bem-sucedida, de <b>${new Date(s.ultimaConsultaValida.consultadoEm).toLocaleString('pt-BR')}</b>. Os valores do ${nome} podem não refletir a situação atual.</div>`);
+    } else {
+      st.className = 'st err'; st.textContent = 'indisponível';
+      el.insertAdjacentHTML('beforeend', '<small>Sem dados</small>');
+      al.push(`<div class="alerta"><b>${nome}: não foi possível consultar o Qlik</b> (${esc(s.erro)}). Os totais consolidados abaixo contêm apenas o outro sistema.</div>`);
+    }
+  }
+  // Só faz sentido somar os dois sistemas se ambos se referem ao mesmo mês
+  const pj = fonte('pje'), ep = fonte('eproc');
+  if (pj && ep) {
+    const mesesPje = [...new Set(pj.fatos.map(f => f.data && f.data.slice(0, 7)).filter(Boolean))];
+    const [a, m] = ep.mes.split('/'), mesEproc = `${a}-${String(MESES_ABREV.indexOf(m) + 1).padStart(2, '0')}`;
+    if (mesesPje.length && mesesPje.some(x => x !== mesEproc))
+      al.push(`<div class="alerta"><b>Períodos diferentes:</b> o PJe traz movimentações de ${mesesPje.map(x => x.split('-').reverse().join('/')).join(', ')} e o eProc está em ${esc(ep.mes)} (ainda sem dados do mês corrente). Os totais consolidados misturam meses distintos até a próxima carga.</div>`);
+  }
+  $('#alertas').innerHTML = al.join('');
+  $('#rodape').innerHTML = `Consulta ao Qlik Sense realizada em ${new Date(D.consultadoEm).toLocaleString('pt-BR')}. Ao recarregar a página ou clicar em “Atualizar dados”, uma nova consulta é feita se a anterior tiver mais de alguns minutos (para não sobrecarregar o Qlik). Os dados no Qlik são atualizados pelas cargas do TJMG; esta página não altera esses horários.`;
+}
+
+function prepararFiltros() {
+  const datas = ['pje', 'eproc'].flatMap(s => (fonte(s)?.fatos || []).map(f => f.data)).filter(Boolean).sort();
+  if (datas.length) {
+    const min = datas[0].slice(0, 8) + '01', max = datas[datas.length - 1];
+    for (const id of ['#f-ini', '#f-fim']) { $(id).min = min; $(id).max = max; }
+  }
+  const nomes = new Map();
+  for (const s of ['pje', 'eproc']) for (const f of fonte(s)?.fatos || []) nomes.set(normNome(f.magistrado), nomes.get(normNome(f.magistrado)) || f.magistrado);
+  const atual = F.mag;
+  $('#f-mag').innerHTML = '<option value="">Todos</option>' + [...nomes].sort((a, b) => a[1].localeCompare(b[1], 'pt-BR')).map(([k, n]) => `<option value="${esc(k)}">${esc(n)}</option>`).join('');
+  $('#f-mag').value = nomes.has(atual) ? atual : '';
+  F.mag = $('#f-mag').value;
+}
+function infoFiltro() {
+  const p = [];
+  if (F.ini || F.fim) p.push(`período ${F.ini ? dataBR(F.ini) : 'início do mês'} a ${F.fim ? dataBR(F.fim) : 'hoje'}`);
+  if (F.mag) p.push(`magistrado(a) ${$('#f-mag').selectedOptions[0].textContent}`);
+  $('#filtro-info').textContent = p.length ? 'Filtros: ' + p.join(' · ') + '. Migração do PJe e Acervo eProc não são filtráveis por data/magistrado.' : 'Sem filtros: mês corrente completo, todas as movimentações da unidade.';
+}
+
+$('#f-sistema').addEventListener('click', ev => {
+  const b = ev.target.closest('button'); if (!b) return;
+  F.sistema = b.dataset.v; $('#f-sistema').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  render();
+});
+$('#f-ini').addEventListener('change', e => { F.ini = e.target.value; infoFiltro(); render(); });
+$('#f-fim').addEventListener('change', e => { F.fim = e.target.value; infoFiltro(); render(); });
+$('#f-mag').addEventListener('change', e => { F.mag = e.target.value; infoFiltro(); render(); });
+$('#btn-limpar').addEventListener('click', () => {
+  Object.assign(F, { ini: '', fim: '', mag: '' }); $('#f-ini').value = $('#f-fim').value = $('#f-mag').value = '';
+  infoFiltro(); render();
+});
+$('#btn-tema').addEventListener('click', () => {
+  const r = document.documentElement, escuro = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  r.dataset.theme = escuro ? 'light' : 'dark';
+  try { localStorage.setItem('tema', r.dataset.theme); } catch { }
+  render();
+});
+try { const t = localStorage.getItem('tema'); if (t) document.documentElement.dataset.theme = t; } catch { }
+let resizeT; addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(render, 150); });
+
+async function carregar() {
+  const btn = $('#btn-atualizar');
+  btn.disabled = true; btn.querySelector('span').textContent = 'Consultando…';
+  try {
+    const r = await fetch('/api/dados', { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    D = await r.json();
+    renderFontes(); prepararFiltros(); infoFiltro(); render();
+  } catch (e) {
+    $('#conteudo').innerHTML = `<div class="alerta"><b>Não foi possível obter os dados.</b> ${location.protocol === 'file:'
+      ? 'Esta página precisa ser aberta pelo servidor do dashboard (endereço publicado ou <code>Iniciar Dashboard.bat</code>), não diretamente como arquivo.'
+      : 'O servidor do dashboard não respondeu (' + esc(e.message) + '). Tente recarregar em alguns segundos.'} Nenhum valor é exibido para não apresentar dados desatualizados como atuais.</div>`;
+  } finally { btn.disabled = false; btn.querySelector('span').textContent = 'Atualizar dados'; }
+}
+$('#btn-atualizar').addEventListener('click', carregar);
+carregar();
+</script>
+</body>
+</html>

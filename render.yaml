@@ -1,0 +1,17 @@
+# Configuração de publicação no Render (https://render.com) — lida automaticamente pelo "Blueprint".
+services:
+  - type: web
+    name: dashboard-1civel-sete-lagoas
+    runtime: node
+    plan: free
+    region: virginia
+    buildCommand: "true"
+    startCommand: node servidor.js
+    healthCheckPath: /saude
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: TZ
+        value: America/Sao_Paulo
+      - key: CACHE_MINUTOS
+        value: "5"
