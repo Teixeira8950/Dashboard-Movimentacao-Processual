@@ -11,7 +11,7 @@
 :root {
   color-scheme: light;
   --bg: #f3f4f6; --surface: #ffffff; --surface-2: #f1f2f4; --line: #dfe2e6; --line-soft: #eceef1;
-  --ink: #111315; --ink-2: #4b525a; --ink-3: #6f7781;
+  --ink: #111315; --ink-2: #434a52; --ink-3: #5f6771;
   --pje: #2a78d6; --eproc: #e05f25; --total: #111315;
   --accent: #9b2f45; --on-accent: #ffffff;
   --ok: #0a8a0a; --warn: #fab219; --crit: #d03b3b; --cache: #a86d00;
@@ -21,7 +21,7 @@
   :root:not([data-theme="light"]) {
     color-scheme: dark;
     --bg: #111315; --surface: #191c20; --surface-2: #20242a; --line: #30353b; --line-soft: #262a30;
-    --ink: #f2f4f6; --ink-2: #b4bac2; --ink-3: #8a929b;
+    --ink: #f2f4f6; --ink-2: #c2c8cf; --ink-3: #9ca4ad;
     --pje: #438fe8; --eproc: #e66a32; --total: #f2f4f6;
     --accent: #d98298; --on-accent: #111315;
     --ok: #3cc46b; --cache: #f0b33c;
@@ -30,7 +30,7 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
   --bg: #111315; --surface: #191c20; --surface-2: #20242a; --line: #30353b; --line-soft: #262a30;
-  --ink: #f2f4f6; --ink-2: #b4bac2; --ink-3: #8a929b;
+  --ink: #f2f4f6; --ink-2: #c2c8cf; --ink-3: #9ca4ad;
   --pje: #438fe8; --eproc: #e66a32; --total: #f2f4f6;
   --accent: #d98298; --on-accent: #111315;
   --ok: #3cc46b; --cache: #f0b33c;
@@ -45,14 +45,14 @@ a { color: var(--pje); }
 header.top { display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--accent); padding-bottom: 16px; margin-bottom: 18px; }
 .eyebrow { font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
 h1 { font-size: 26px; line-height: 1.2; margin: 4px 0 2px; font-weight: 650; letter-spacing: -.01em; }
-.sub { color: var(--ink-3); font-size: 13px; }
+.sub { color: var(--ink-3); font-size: 13.5px; }
 .sub .magistrada b { color: var(--ink); font-weight: 600; }
 .fontes { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .fonte { display: grid; grid-template-columns: auto auto; column-gap: 8px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 7px 12px; min-width: 150px; }
 .fonte .nome { font-weight: 650; font-size: 13px; display: flex; align-items: center; gap: 7px; }
 .fonte .st { font-size: 12px; font-weight: 600; justify-self: end; display: inline-flex; align-items: center; gap: 5px; }
 .fonte .st::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
-.fonte small { grid-column: 1 / -1; font-size: 11.5px; color: var(--ink-3); }
+.fonte small { grid-column: 1 / -1; font-size: 12.5px; color: var(--ink-3); }
 .st.ok { color: var(--ok); } .st.err { color: var(--crit); } .st.cache { color: var(--cache); }
 .dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; flex: none; vertical-align: -1px; }
 .dot.pje { background: var(--pje); } .dot.eproc { background: var(--eproc); } .dot.total { background: var(--total); }
@@ -92,7 +92,9 @@ button, select, input { font: inherit; color: inherit; }
 .seg button:hover { color: var(--ink); }
 .seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); font-weight: 650; }
 .seg button[aria-pressed="true"] .dot.total { background: var(--bg); }
-.filtro-info { font-size: 12px; color: var(--ink-3); margin: 0 2px 6px; }
+.filtro-info { font-size: 13px; color: var(--ink-3); margin: 0 2px 6px; }
+.filtro-info .aviso-per { color: var(--cache); }
+.periodo-ref { color: var(--ink-2); font-weight: 600; }
 
 .alertas:empty { display: none; }
 .alerta { border: 1px solid var(--line); border-left: 4px solid var(--crit); background: var(--surface); border-radius: var(--radius); padding: 10px 14px; margin-bottom: 10px; }
@@ -102,7 +104,8 @@ button, select, input { font: inherit; color: inherit; }
 .secao { margin-top: 26px; }
 .secao-tit { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 0 0 12px; }
 h2 { font-size: 15px; margin: 0; font-weight: 650; display: inline-flex; gap: 8px; align-items: center; }
-.secao-tit small { color: var(--ink-3); font-size: 12.5px; }
+.secao-tit small { color: var(--ink-3); font-size: 13.5px; }
+.secao-tit .btn-csv { margin-left: auto; padding: 6px 12px; font-size: 12.5px; }
 .grid { display: grid; gap: 14px; }
 
 /* ---------- Cards de indicadores ---------- */
@@ -113,7 +116,7 @@ h2 { font-size: 15px; margin: 0; font-weight: 650; display: inline-flex; gap: 8p
 @media (max-width: 480px) { .kpis-principais, .kpis-compl { grid-template-columns: minmax(0, 1fr); } }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; min-width: 0; }
 .kpi { display: flex; flex-direction: column; }
-.kpi .rot { color: var(--ink-2); font-weight: 600; font-size: 13px; display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 22px; }
+.kpi .rot { color: var(--ink-2); font-weight: 600; font-size: 14px; display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 22px; }
 .tag { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; padding: 2px 7px; border-radius: 4px; border: 1px solid var(--line); color: var(--ink-3); white-space: nowrap; }
 .tag.pje { color: var(--pje); border-color: color-mix(in srgb, var(--pje) 40%, transparent); }
 .tag.eproc { color: var(--eproc); border-color: color-mix(in srgb, var(--eproc) 40%, transparent); }
@@ -121,24 +124,29 @@ h2 { font-size: 15px; margin: 0; font-weight: 650; display: inline-flex; gap: 8p
 .split { display: flex; height: 10px; border-radius: 5px; overflow: hidden; gap: 2px; background: var(--surface-2); }
 .split span { display: block; height: 100%; min-width: 3px; }
 .split .p { background: var(--pje); } .split .e { background: var(--eproc); }
-.parts { display: flex; justify-content: space-between; gap: 8px; margin-top: 8px; font-size: 12.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.parts { display: flex; justify-content: space-between; gap: 8px; margin-top: 8px; font-size: 13.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
 .parts > span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .parts b { color: var(--ink); font-weight: 650; }
-.parts .pct { color: var(--ink-3); font-size: 11.5px; }
-.det { margin-top: auto; padding-top: 12px; display: grid; gap: 4px; font-size: 12px; color: var(--ink-3); }
+.parts .pct { color: var(--ink-3); font-size: 12.5px; }
+.det { margin-top: auto; padding-top: 12px; display: grid; gap: 5px; font-size: 13px; color: var(--ink-3); }
 .det::before { content: ""; display: block; border-top: 1px solid var(--line-soft); margin-bottom: 6px; }
 .det div { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
 .det div > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .det b { color: var(--ink-2); font-weight: 600; font-variant-numeric: tabular-nums; }
 .det .tag { font-size: 9.5px; padding: 0 5px; margin-left: 4px; }
 .det + .det { padding-top: 10px; margin-top: 0; }
-.det-tit { font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); font-weight: 600; margin-bottom: 2px; }
+.det-tit { font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); font-weight: 600; margin-bottom: 2px; }
 .det .vs { display: inline-flex; gap: 10px; flex: none; }
 .det .v { display: inline-flex; align-items: center; gap: 4px; color: var(--ink-2); font-weight: 600; font-variant-numeric: tabular-nums; min-width: 34px; justify-content: flex-end; }
 .det .v .dot { width: 7px; height: 7px; border-radius: 2px; }
 .det-total { margin-top: 4px; padding-top: 6px; border-top: 1px dashed var(--line-soft); }
 .det-total span, .det-total b { color: var(--ink-3); }
-.kpi .resumo { margin-top: auto; padding-top: 12px; font-size: 12px; color: var(--ink-3); border-top: 1px solid var(--line-soft); }
+.kpi .resumo { margin-top: auto; padding-top: 12px; font-size: 13px; color: var(--ink-3); border-top: 1px solid var(--line-soft); }
+.kpi { position: relative; }
+.rot-nome { display: inline-flex; align-items: center; gap: 6px; }
+.ajuda { display: none; position: absolute; left: 12px; right: 12px; top: 46px; z-index: 4; background: var(--ink); color: var(--bg); font-size: 13px; font-weight: 400; line-height: 1.45; padding: 10px 12px; border-radius: 6px; box-shadow: 0 8px 22px rgba(0,0,0,.35); }
+.info:hover + .ajuda, .info:focus + .ajuda, .info.aberta + .ajuda { display: block; }
+.info:focus-visible { outline: 2px solid var(--pje); outline-offset: 2px; }
 .info { display: inline-flex; width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--line); color: var(--ink-3); font-size: 10.5px; font-weight: 700; align-items: center; justify-content: center; cursor: help; font-style: normal; }
 
 /* ---------- Tabelas ---------- */
@@ -146,20 +154,20 @@ table { width: 100%; border-collapse: separate; border-spacing: 0; font-variant-
 th, td { padding: 10px 14px; text-align: right; border-bottom: 1px solid var(--line-soft); white-space: nowrap; }
 th:first-child, td:first-child { text-align: left; white-space: normal; }
 td[rowspan] { vertical-align: top; font-weight: 600; border-right: 1px solid var(--line-soft); }
-thead th { font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-3); font-weight: 600; background: var(--surface-2); position: sticky; top: 0; z-index: 1; border-bottom: 1px solid var(--line); }
+thead th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-3); font-weight: 600; background: var(--surface-2); position: sticky; top: 0; z-index: 1; border-bottom: 1px solid var(--line); }
 thead th .dot { margin-right: 4px; }
 tbody tr:hover td { background: color-mix(in srgb, var(--surface-2) 70%, transparent); }
 tr.grupo td { font-weight: 650; color: var(--ink); background: color-mix(in srgb, var(--surface-2) 55%, transparent); }
 tr.sub td:first-child { padding-left: 30px; color: var(--ink-2); }
 td.tot, th.tot { font-weight: 700; background: color-mix(in srgb, var(--accent) 7%, transparent); }
 thead th.tot { color: var(--ink); background: color-mix(in srgb, var(--accent) 14%, var(--surface-2)); }
-td.trat { color: var(--ink-3); font-size: 12.5px; text-align: left; }
+td.trat { color: var(--ink-3); font-size: 13px; text-align: left; }
 td.na { color: var(--ink-3); }
 tbody tr:last-child td { border-bottom: 0; }
 .tabwrap { overflow: auto; padding: 0; }
 .tabwrap.alta { max-height: 72vh; }
 .tabwrap > .nota { padding: 10px 14px; margin: 0; border-top: 1px solid var(--line-soft); }
-.nota { font-size: 12px; color: var(--ink-3); font-weight: 400; }
+.nota { font-size: 12.5px; color: var(--ink-3); font-weight: 400; }
 .cols2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr)); }
 
 /* ---------- Gráficos ---------- */
@@ -168,8 +176,8 @@ tbody tr:last-child td { border-bottom: 0; }
 .chart-head .seg { height: 30px; }
 .legend { display: flex; gap: 16px; font-size: 12.5px; color: var(--ink-2); flex-wrap: wrap; margin-bottom: 4px; }
 .legend span { display: inline-flex; gap: 6px; align-items: center; }
-svg text { fill: var(--ink-3); font-size: 11px; }
-svg .lbl { fill: var(--ink-2); font-size: 11px; font-weight: 600; }
+svg text { fill: var(--ink-3); font-size: 12px; }
+svg .lbl { fill: var(--ink-2); font-size: 12px; font-weight: 600; }
 .grid-l { stroke: var(--line-soft); stroke-width: 1; }
 .tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--bg); border-radius: 6px; padding: 8px 10px; font-size: 12.5px; z-index: 50; display: none; min-width: 150px; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
 .tip div { display: flex; justify-content: space-between; gap: 14px; }
@@ -179,7 +187,7 @@ svg .lbl { fill: var(--ink-2); font-size: 11px; font-weight: 600; }
 .metodo ul { margin: 0; padding-left: 18px; }
 .metodo li { margin-bottom: 6px; }
 .carregando { padding: 60px 0; text-align: center; color: var(--ink-2); }
-footer { margin-top: 30px; font-size: 12px; color: var(--ink-3); }
+footer { margin-top: 30px; font-size: 12.5px; color: var(--ink-3); }
 @media (max-width: 760px) {
   .wrap { padding: 16px 16px 40px; }
   h1 { font-size: 21px; } .kpi .val { font-size: 32px; }
@@ -288,6 +296,22 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const cargaBR = t => { const m = String(t || '').match(/^(\d{4})-(\d{2})-(\d{2})(.*)$/); return m ? `${m[3]}/${m[2]}/${m[1]}${m[4]}` : String(t || ''); };
 const dataBR = iso => iso ? iso.slice(8, 10) + '/' + iso.slice(5, 7) : '';
+const dataBRc = iso => iso ? iso.split('-').reverse().join('/') : '';
+
+// Período efetivamente coberto pelos números exibidos: do início do mês (ou filtro "De")
+// até a última data com movimentação nos dados (ou filtro "Até")
+function periodo() {
+  const ult = sis => (fonte(sis)?.fatos || []).map(f => f.data).filter(Boolean).sort().pop() || null;
+  const uPje = ult('pje'), uEproc = ult('eproc');
+  const ultimo = [uPje, uEproc].filter(Boolean).sort().pop();
+  if (!ultimo) return null;
+  const ini = F.ini || ultimo.slice(0, 8) + '01', fim = F.fim || ultimo;
+  const txt = `${dataBRc(ini)} a ${dataBRc(fim)}`;
+  // quando os sistemas param em datas diferentes, avisa (só faz sentido sem filtro "Até")
+  const difere = !F.fim && uPje && uEproc && uPje !== uEproc
+    ? `PJe com movimentações até ${dataBRc(uPje)}; eProc até ${dataBRc(uEproc)}` : '';
+  return { ini, fim, txt, difere };
+}
 
 // Fonte efetiva de cada sistema: consulta atual ou, se falhou, a última válida (sinalizada)
 function fonte(sis) {
@@ -336,6 +360,8 @@ function render() {
     const e = m.tipo !== 'pje' && usa('eproc') ? `<span class="v"><span class="dot eproc"></span>${fmt(vEproc(k))}</span>` : '';
     return `<div><span title="${m.nome}">${nome || m.nome}${m.tipo === 'pje' ? '<span class="tag pje">Exclusivo PJe</span>' : ''}</span><span class="vs">${p}${e}</span></div>`;
   };
+  // Ícone de ajuda: mostra o critério ao passar o mouse ou tocar (foco), dentro dos limites do card
+  const ajuda = txt => `<i class="info" tabindex="0" role="button" aria-label="Como é calculado">i</i><span class="ajuda" role="tooltip">${txt}</span>`;
   // Card: número grande = métrica principal; demais movimentações ficam nos detalhes, separadas por sistema
   const cardKpi = c => {
     const p = soma(Object.fromEntries(c.principal.map(k => [k, vPje(k)])), c.principal);
@@ -350,35 +376,37 @@ function render() {
       det += `<div class="det"><div class="det-tit">${c.extrasNome}</div>${c.extras.map(([k, n]) => linhaDet(k, n)).join('')}
         <div class="det-total"><span>${c.totalNome}</span><b>${fmt(totalGeral)}</b></div></div>`;
     }
-    return `<div class="card kpi"><div class="rot"><span>${c.nome}</span></div>
+    return `<div class="card kpi"><div class="rot"><span class="rot-nome">${c.nome}${c.ajuda ? ajuda(c.ajuda) : ''}</span></div>
       <div class="val">${fmt(tot)}</div>
       ${barraSplit(p, e)}
       <div class="parts"><span><span class="dot pje"></span>PJe <b>${usa('pje') ? fmt(p) : '—'}</b>${pct(p)}</span><span>eProc <b>${usa('eproc') ? fmt(e) : '—'}</b>${pct(e)}<span class="dot eproc"></span></span></div>
       ${det}</div>`;
   };
   const CARDS = [
-    { nome: 'Distribuições', principal: ['dist'], extras: [['receb', 'Recebidos de outro juízo'], ['reativ', 'Reativações'], ['virt', 'Virtualizações']], extrasNome: 'Outras entradas', totalNome: 'Total de entradas' },
-    { nome: 'Baixas', principal: ['baixa'], extras: [['remessa', 'Remessas a outro juízo']], extrasNome: 'Outras saídas', totalNome: 'Total de saídas' },
-    { nome: 'Julgamentos', principal: ['jcm', 'jsm'], partes: [['jcm', 'Com mérito'], ['jsm', 'Sem mérito']] },
-    { nome: 'Decisões', principal: ['decisao'] },
-    { nome: 'Despachos', principal: ['despacho'] },
+    { nome: 'Distribuições', ajuda: 'Processos distribuídos à vara no período, somando PJe e eProc. Não inclui recebidos de outro juízo, reativações, virtualizações nem a migração PJe → eProc (que aparecem à parte).', principal: ['dist'], extras: [['receb', 'Recebidos de outro juízo'], ['reativ', 'Reativações'], ['virt', 'Virtualizações']], extrasNome: 'Outras entradas', totalNome: 'Total de entradas' },
+    { nome: 'Baixas', ajuda: 'Baixas registradas no período, somando PJe e eProc. Não inclui remessas a outro juízo nem processos migrados do PJe para o eProc.', principal: ['baixa'], extras: [['remessa', 'Remessas a outro juízo']], extrasNome: 'Outras saídas', totalNome: 'Total de saídas' },
+    { nome: 'Julgamentos', ajuda: 'Sentenças registradas no período: julgamentos com mérito + sem mérito, somando PJe e eProc.', principal: ['jcm', 'jsm'], partes: [['jcm', 'Com mérito'], ['jsm', 'Sem mérito']] },
+    { nome: 'Decisões', ajuda: 'Decisões proferidas no período, somando PJe e eProc. Conta atos: um mesmo processo pode ter mais de uma decisão.', principal: ['decisao'] },
+    { nome: 'Despachos', ajuda: 'Despachos proferidos no período, somando PJe e eProc. Conta atos: um mesmo processo pode ter mais de um despacho.', principal: ['despacho'] },
   ];
-  html.push(secao('Movimentações da unidade', `${escopo} · mês corrente${filtroAtivo() ? ' · com filtros aplicados' : ''}`,
+  const per = periodo();
+  const perTxt = per ? `<b class="periodo-ref">${per.txt}</b>` : 'mês corrente';
+  html.push(secao('Movimentações da unidade', `${escopo} · ${perTxt}${filtroAtivo() ? ' · período filtrado' : ''}`,
     `<div class="grid kpis-principais">${CARDS.map(cardKpi).join('')}</div>`));
 
   // --- Indicadores complementares: audiências, migração (não somada) e acervo (exclusivo eProc)
   const migrOut = pje ? pje.migradosParaEproc : null;
   const migrIn = t.eproc.migrIn || 0;
-  const cardMigr = `<div class="card kpi"><div class="rot"><span>Migração PJe → eProc</span><span class="tag">Indicador independente</span></div>
+  const cardMigr = `<div class="card kpi"><div class="rot"><span class="rot-nome">Migração PJe → eProc${ajuda('Processos migrados do PJe para o eProc. São os mesmos processos vistos dos dois lados (saída no PJe, entrada no eProc), por isso não entram nas entradas nem nas saídas consolidadas. O PJe não informa a data da migração: o valor não muda com o filtro de período.')}</span><span class="tag">Indicador independente</span></div>
       <div class="val">${migrOut == null ? '—' : fmt(migrOut)}</div>
       <div class="det"><div><span>Saída “Migrado” no PJe</span><b>${migrOut == null ? '—' : fmt(migrOut)}</b></div>
       <div><span>Entrada “Migrado” no eProc${filtroAtivo() ? ' (filtrado)' : ''}</span><b>${eproc ? fmt(migrIn) : '—'}</b></div></div>
       <div class="resumo">Transferência entre sistemas: não entra nas entradas e saídas consolidadas.</div></div>`;
-  const cardAcervo = `<div class="card kpi"><div class="rot"><span>Acervo eProc <i class="info" title="Processos em acervo no eProc, posição do dia anterior. Não varia com o filtro de período. O painel do PJe não publica acervo.">i</i></span><span class="tag eproc">Exclusivo eProc</span></div>
+  const cardAcervo = `<div class="card kpi"><div class="rot"><span class="rot-nome">Acervo eProc${ajuda('Processos em tramitação no eProc na posição do dia anterior (critério do próprio painel do eProc). Não varia com o filtro de período. O painel do PJe não publica acervo.')}</span><span class="tag eproc">Exclusivo eProc</span></div>
       <div class="val">${eproc ? fmt(eproc.acervo) : '—'}</div>
       <div class="resumo">Posição do dia anterior · não afetado pelos filtros</div></div>`;
   html.push(secao('Indicadores complementares', '',
-    `<div class="grid kpis-compl">${cardKpi({ nome: 'Audiências', principal: ['aud'] })}${cardMigr}${cardAcervo}</div>`));
+    `<div class="grid kpis-compl">${cardKpi({ nome: 'Audiências', ajuda: 'Audiências realizadas no período, somando PJe e eProc.', principal: ['aud'] })}${cardMigr}${cardAcervo}</div>`));
 
   // --- Tabela comparativa
   const c = v => v == null ? '<td class="na">—</td>' : `<td>${fmt(v)}</td>`;
@@ -404,7 +432,7 @@ function render() {
     <tr class="sub"><td>Saídas no painel PJe (Baixa + Remessa + Migrado)</td>${c(pje ? soma(t.pje, GRUPOS.saidas.ks) + (migrOut || 0) : null)}${na}<td class="tot na">—</td><td class="trat">Referência</td></tr>
     <tr class="sub"><td>Distribuídos + Migrados no painel eProc</td>${na}${c(eproc ? (t.eproc.dist || 0) + migrIn : null)}<td class="tot na">—</td><td class="trat">Referência</td></tr>
     </tbody></table></div>`;
-  html.push(secao('Comparativo PJe × eProc', `contagem de movimentações no mês${filtroAtivo() ? ' · com filtros' : ''}`, tb));
+  html.push(secao('Comparativo PJe × eProc', `contagem de movimentações · ${perTxt}${filtroAtivo() ? ' · período filtrado' : ''}`, tb, '<button class="btn btn-csv" id="btn-csv" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg><span>Baixar planilha (CSV)</span></button>'));
 
   // --- Gráficos
   html.push(`<div class="grid cols2 secao">
@@ -436,7 +464,44 @@ function render() {
   </ul></div></section>`);
 
   $('#conteudo').innerHTML = html.join('');
+  $('#btn-csv').addEventListener('click', exportarCSV);
   ligarGraficos();
+}
+
+// Exporta a tabela comparativa (mesmos números da tela, com o período aplicado) em CSV para Excel
+function exportarCSV() {
+  const t = totais(), pje = fonte('pje'), eproc = fonte('eproc'), per = periodo();
+  const migrOut = pje ? pje.migradosParaEproc : null, migrIn = t.eproc.migrIn || 0;
+  const cel = v => v == null ? '' : typeof v === 'number' ? String(v) : `"${String(v).replace(/"/g, '""')}"`;
+  const linhas = [
+    ['Movimentação Processual — 1ª Vara Cível da Comarca de Sete Lagoas (PJe + eProc)'],
+    ['Período', per ? per.txt + (filtroAtivo() ? ' (filtrado)' : '') : ''],
+    ...(per && per.difere ? [['Observação', per.difere]] : []),
+    ['Consulta ao Qlik Sense', new Date(D.consultadoEm).toLocaleString('pt-BR')],
+    ['Última carga PJe', pje ? cargaBR(pje.atualizacaoQlik) : 'indisponível'],
+    ['Última carga eProc', eproc ? cargaBR(eproc.atualizacaoQlik) : 'indisponível'],
+    [],
+    ['Grupo', 'Indicador', 'PJe', 'eProc', 'Total consolidado', 'Tratamento'],
+  ];
+  let grupoAtual = '';
+  for (const m of METRICAS) {
+    if (m.grupo !== grupoAtual) {
+      grupoAtual = m.grupo;
+      const g = Object.values(GRUPOS).find(x => x.nome === m.grupo && x.ks.length > 1);
+      if (g) linhas.push([m.grupo, `Total de ${m.grupo.toLowerCase()}`, soma(t.pje, g.ks), soma(t.eproc, g.ks), soma(t.pje, g.ks) + soma(t.eproc, g.ks), 'Subtotal']);
+    }
+    const p = t.pje[m.k] || 0, e = t.eproc[m.k] || 0;
+    linhas.push([m.grupo, m.nome, m.tipo === 'eproc' ? 'n/a' : p, m.tipo === 'pje' ? 'n/a' : e, p + e,
+      { soma: 'Somado', pje: 'Exclusivo PJe', eproc: 'Exclusivo eProc' }[m.tipo]]);
+  }
+  linhas.push(['Transferência entre sistemas', 'Migrado (saída do PJe / entrada no eProc)', migrOut, migrIn, '', 'Não somado']);
+  linhas.push(['Complementar', 'Acervo eProc (posição do dia anterior)', 'n/a', eproc ? eproc.acervo : '', '', 'Exclusivo eProc']);
+  const csv = '﻿' + linhas.map(l => l.map(cel).join(';')).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = `movimentacao-1a-vara-civel-sete-lagoas_${per ? per.ini + '_a_' + per.fim : 'mes'}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
 function barraSplit(p, e) {
@@ -501,14 +566,25 @@ function barrasEmpilhadas(el, cats, series, opts = {}) {
 }
 
 // Barras horizontais agrupadas (comparativo por indicador)
+// Mede o texto com a mesma fonte do gráfico, para a margem caber os rótulos
+const medidor = document.createElement('canvas').getContext('2d');
+function larguraTexto(txt) { medidor.font = '600 12px "Segoe UI", system-ui, sans-serif'; return medidor.measureText(txt).width; }
+// Encurta com reticências um rótulo que não cabe na largura disponível
+function caber(txt, larg) {
+  if (larguraTexto(txt) <= larg) return txt;
+  let t = txt; while (t.length > 3 && larguraTexto(t + '…') > larg) t = t.slice(0, -1);
+  return t.trimEnd() + '…';
+}
 function barrasHorizontais(el, linhas, series) {
-  const W = Math.max(el.clientWidth, 300), lh = series.length * 14 + 14, m = { t: 6, r: 44, l: Math.min(190, W * .42) };
+  const W = Math.max(el.clientWidth, 300), lh = series.length * 14 + 14;
+  const maiorRotulo = Math.max(...linhas.map(l => larguraTexto(l.nome)));
+  const m = { t: 6, r: 44, l: Math.min(maiorRotulo + 14, W * .45) };
   const H = m.t + linhas.length * lh + 6, iw = W - m.l - m.r;
   const max = Math.max(1, ...linhas.flatMap(l => series.map(s => l.v[s.k] || 0)));
   let s = `<svg width="${W}" height="${H}" role="img" aria-label="Comparativo por indicador">`;
   linhas.forEach((l, i) => {
     const y0 = m.t + i * lh;
-    s += `<text x="${m.l - 8}" y="${y0 + lh / 2 + 2}" text-anchor="end" class="lbl">${esc(l.nome)}</text>`;
+    s += `<text x="${m.l - 8}" y="${y0 + lh / 2 + 2}" text-anchor="end" class="lbl"><title>${esc(l.nome)}</title>${esc(caber(l.nome, m.l - 12))}</text>`;
     series.forEach((sr, j) => {
       const v = l.v[sr.k] || 0, w = v / max * iw, yy = y0 + 6 + j * 14;
       if (v > 0) s += `<path fill="${sr.cor}" d="M${m.l},${yy} H${m.l + w - Math.min(4, w / 2)} Q${m.l + w},${yy} ${m.l + w},${yy + Math.min(4, w / 2)} V${yy + 12 - Math.min(4, w / 2)} Q${m.l + w},${yy + 12} ${m.l + w - Math.min(4, w / 2)},${yy + 12} H${m.l} Z"/>`;
@@ -616,9 +692,12 @@ function prepararFiltros() {
   }
 }
 function infoFiltro() {
-  const p = [];
-  if (F.ini || F.fim) p.push(`período ${F.ini ? dataBR(F.ini) : 'início do mês'} a ${F.fim ? dataBR(F.fim) : 'hoje'}`);
-  $('#filtro-info').textContent = p.length ? 'Filtros: ' + p.join(' · ') + '. Migração do PJe e Acervo eProc não são filtráveis por data.' : 'Sem filtros: mês corrente completo, todas as movimentações da unidade.';
+  const per = periodo();
+  if (!per) { $('#filtro-info').textContent = ''; return; }
+  const base = filtroAtivo()
+    ? `Período aplicado: ${per.txt} (filtrado). Migração do PJe e Acervo eProc não variam com o período.`
+    : `Período: ${per.txt} — mês corrente até a última movimentação registrada nas cargas do Qlik.`;
+  $('#filtro-info').innerHTML = esc(base) + (per.difere ? ` <span class="aviso-per">${esc(per.difere)}.</span>` : '');
 }
 
 $('#f-sistema').addEventListener('click', ev => {
@@ -656,6 +735,16 @@ async function carregar() {
   } finally { btn.disabled = false; btn.querySelector('span').textContent = 'Atualizar dados'; }
 }
 $('#btn-atualizar').addEventListener('click', carregar);
+// Ajuda dos cards: abre/fecha com clique ou toque (no celular não existe "passar o mouse"); Esc ou clique fora fecha
+document.addEventListener('click', ev => {
+  const i = ev.target.closest('.info');
+  document.querySelectorAll('.info.aberta').forEach(x => { if (x !== i) x.classList.remove('aberta'); });
+  if (i) i.classList.toggle('aberta');
+});
+document.addEventListener('keydown', ev => {
+  if (ev.key === 'Escape') document.querySelectorAll('.info.aberta').forEach(x => x.classList.remove('aberta'));
+  if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.classList?.contains('info')) { ev.preventDefault(); ev.target.click(); }
+});
 carregar();
 </script>
 </body>
