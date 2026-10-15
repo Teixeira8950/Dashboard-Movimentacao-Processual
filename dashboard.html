@@ -63,6 +63,17 @@ button, select, input { font: inherit; color: inherit; }
 .btn.link { border-color: transparent; background: transparent; color: var(--ink-2); font-weight: 500; }
 .btn.link:hover { color: var(--ink); border-color: var(--line); }
 
+/* ---------- Arte do cabeçalho ---------- */
+.banner { display: none; margin: 0 0 14px; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: #151a21; aspect-ratio: 2000 / 414; }
+/* a imagem é ancorada no topo; a altura do contêiner corta a faixa vazia inferior da arte */
+.banner img { display: block; width: 100%; height: auto; }
+.com-banner .banner { display: block; }
+/* com a arte, o título em texto fica só para leitores de tela */
+.com-banner .titulo-texto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.com-banner header.top { border-bottom: 0; padding-bottom: 6px; margin-bottom: 12px; }
+/* celular: mostra só a parte esquerda da arte (logo e nome da unidade), em tamanho legível */
+@media (max-width: 760px) { .banner { aspect-ratio: 1180 / 414; border-radius: 8px; } .banner img { width: calc(100% * 2000 / 1180); max-width: none; } }
+
 /* ---------- Filtros ---------- */
 .filtros { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 8px; position: sticky; top: 0; z-index: 5; box-shadow: 0 6px 16px -12px rgba(0,0,0,.5); }
 .filtros label { display: flex; flex-direction: column; gap: 5px; font-size: 11.5px; color: var(--ink-3); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
@@ -168,12 +179,15 @@ footer { margin-top: 30px; font-size: 12px; color: var(--ink-3); }
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap com-banner" id="topo">
+  <div class="banner"><img src="banner.webp" alt="TJMG · 1ª Vara Cível · Comarca de Sete Lagoas · Painel de Movimentação Processual" onerror="document.getElementById('topo').classList.remove('com-banner')"></div>
   <header class="top">
     <div>
-      <div class="eyebrow">TJMG · Movimentação Processual · Mês corrente</div>
-      <h1>1ª Vara Cível da Comarca de Sete Lagoas</h1>
-      <div class="sub">Painel unificado PJe + eProc · dados consultados no Qlik Sense do TJMG</div>
+      <div class="titulo-texto">
+        <div class="eyebrow">TJMG · Movimentação Processual · Mês corrente</div>
+        <h1>1ª Vara Cível da Comarca de Sete Lagoas</h1>
+      </div>
+      <div class="sub">Painel unificado PJe + eProc · mês corrente · dados consultados no Qlik Sense do TJMG</div>
     </div>
     <div class="fontes">
       <div class="fonte" id="f-pje"><span class="nome"><span class="dot pje"></span>PJe</span><span class="st">…</span></div>

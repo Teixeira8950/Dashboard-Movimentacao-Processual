@@ -241,6 +241,11 @@ if (require.main === module) http.createServer(async (req, res) => {
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
       return res.end(fs.readFileSync(path.join(__dirname, 'dashboard.html')));
     }
+    // arte do cabeçalho (único arquivo estático servido)
+    if (req.url.split('?')[0] === '/banner.webp' && fs.existsSync(path.join(__dirname, 'banner.webp'))) {
+      res.writeHead(200, { 'Content-Type': 'image/webp', 'Cache-Control': 'public, max-age=86400' });
+      return res.end(fs.readFileSync(path.join(__dirname, 'banner.webp')));
+    }
     res.writeHead(404); res.end();
   } catch (e) {
     res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
