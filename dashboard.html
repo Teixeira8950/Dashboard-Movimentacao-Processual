@@ -124,9 +124,17 @@ h2 { font-size: 15px; margin: 0; font-weight: 650; display: inline-flex; gap: 8p
 .parts .pct { color: var(--ink-3); font-size: 11.5px; }
 .det { margin-top: auto; padding-top: 12px; display: grid; gap: 4px; font-size: 12px; color: var(--ink-3); }
 .det::before { content: ""; display: block; border-top: 1px solid var(--line-soft); margin-bottom: 6px; }
-.det div { display: flex; justify-content: space-between; gap: 8px; }
+.det div { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.det div > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .det b { color: var(--ink-2); font-weight: 600; font-variant-numeric: tabular-nums; }
 .det .tag { font-size: 9.5px; padding: 0 5px; margin-left: 4px; }
+.det + .det { padding-top: 10px; margin-top: 0; }
+.det-tit { font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); font-weight: 600; margin-bottom: 2px; }
+.det .vs { display: inline-flex; gap: 10px; flex: none; }
+.det .v { display: inline-flex; align-items: center; gap: 4px; color: var(--ink-2); font-weight: 600; font-variant-numeric: tabular-nums; min-width: 34px; justify-content: flex-end; }
+.det .v .dot { width: 7px; height: 7px; border-radius: 2px; }
+.det-total { margin-top: 4px; padding-top: 6px; border-top: 1px dashed var(--line-soft); }
+.det-total span, .det-total b { color: var(--ink-3); }
 .kpi .resumo { margin-top: auto; padding-top: 12px; font-size: 12px; color: var(--ink-3); border-top: 1px solid var(--line-soft); }
 .info { display: inline-flex; width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--line); color: var(--ink-3); font-size: 10.5px; font-weight: 700; align-items: center; justify-content: center; cursor: help; font-style: normal; }
 
@@ -260,8 +268,8 @@ const METRICAS = [
   { k: 'conclusao', nome: 'Conclusão', grupo: 'Outros (eProc)', tipo: 'eproc', nota: 'existe na base do eProc, mas não é exibida no painel original' },
 ];
 const GRUPOS = {
-  entradas: { nome: 'Entradas', ks: ['dist', 'receb', 'reativ', 'virt'] },
-  saidas: { nome: 'Saídas', ks: ['baixa', 'remessa'] },
+  entradas: { nome: 'Entradas', rotulo: 'Total de entradas', ks: ['dist', 'receb', 'reativ', 'virt'] },
+  saidas: { nome: 'Saídas', rotulo: 'Total de saídas', ks: ['baixa', 'remessa'] },
   julg: { nome: 'Julgamentos', ks: ['jcm', 'jsm'] },
   decisao: { nome: 'Decisões', ks: ['decisao'] },
   despacho: { nome: 'Despachos', ks: ['despacho'] },
@@ -316,22 +324,44 @@ function render() {
   // --- KPIs principais
   const escopo = F.sistema === 'ambos' ? 'PJe + eProc' : F.sistema === 'pje' ? 'Somente PJe' : 'Somente eProc';
   const secao = (titulo, sub, corpo, extra = '') => `<section class="secao"><div class="secao-tit"><h2>${titulo}</h2>${sub ? `<small>${sub}</small>` : ''}${extra}</div>${corpo}</section>`;
-  const cardGrupo = g => {
-    const p = usa('pje') ? soma(t.pje, g.ks) : 0, e = usa('eproc') ? soma(t.eproc, g.ks) : 0, tot = p + e;
+  // Valor de uma métrica por sistema, respeitando o filtro de sistema
+  const vPje = k => usa('pje') ? t.pje[k] || 0 : 0, vEproc = k => usa('eproc') ? t.eproc[k] || 0 : 0;
+  // Linha de detalhe: nome + valores por sistema (métricas exclusivas mostram só o sistema de origem)
+  const linhaDet = (k, nome) => {
+    const m = METRICAS.find(x => x.k === k);
+    const p = m.tipo !== 'eproc' && usa('pje') ? `<span class="v"><span class="dot pje"></span>${fmt(vPje(k))}</span>` : '';
+    const e = m.tipo !== 'pje' && usa('eproc') ? `<span class="v"><span class="dot eproc"></span>${fmt(vEproc(k))}</span>` : '';
+    return `<div><span title="${m.nome}">${nome || m.nome}${m.tipo === 'pje' ? '<span class="tag pje">Exclusivo PJe</span>' : ''}</span><span class="vs">${p}${e}</span></div>`;
+  };
+  // Card: número grande = métrica principal; demais movimentações ficam nos detalhes, separadas por sistema
+  const cardKpi = c => {
+    const p = soma(Object.fromEntries(c.principal.map(k => [k, vPje(k)])), c.principal);
+    const e = soma(Object.fromEntries(c.principal.map(k => [k, vEproc(k)])), c.principal);
+    const tot = p + e;
     const pct = v => F.sistema === 'ambos' && tot ? ` <span class="pct">${Math.round(v / tot * 100)}%</span>` : '';
-    const det = g.ks.length > 1 ? `<div class="det">${g.ks.map(k => {
-      const m = METRICAS.find(x => x.k === k);
-      const v = (usa('pje') ? t.pje[k] || 0 : 0) + (usa('eproc') ? t.eproc[k] || 0 : 0);
-      return `<div><span>${m.nome}${m.tipo === 'pje' ? '<span class="tag pje">Exclusivo PJe</span>' : ''}</span><b>${fmt(v)}</b></div>`;
-    }).join('')}</div>` : '';
-    return `<div class="card kpi"><div class="rot"><span>${g.nome}</span></div>
+    let det = '';
+    if (c.partes) det += `<div class="det">${c.partes.map(([k, n]) => linhaDet(k, n)).join('')}</div>`;
+    if (c.extras) {
+      const todos = [...c.principal, ...c.extras.map(([k]) => k)];
+      const totalGeral = todos.reduce((a, k) => a + vPje(k) + vEproc(k), 0);
+      det += `<div class="det"><div class="det-tit">${c.extrasNome}</div>${c.extras.map(([k, n]) => linhaDet(k, n)).join('')}
+        <div class="det-total"><span>${c.totalNome}</span><b>${fmt(totalGeral)}</b></div></div>`;
+    }
+    return `<div class="card kpi"><div class="rot"><span>${c.nome}</span></div>
       <div class="val">${fmt(tot)}</div>
       ${barraSplit(p, e)}
       <div class="parts"><span><span class="dot pje"></span>PJe <b>${usa('pje') ? fmt(p) : '—'}</b>${pct(p)}</span><span>eProc <b>${usa('eproc') ? fmt(e) : '—'}</b>${pct(e)}<span class="dot eproc"></span></span></div>
       ${det}</div>`;
   };
+  const CARDS = [
+    { nome: 'Distribuições', principal: ['dist'], extras: [['receb', 'Recebidos de outro juízo'], ['reativ', 'Reativações'], ['virt', 'Virtualizações']], extrasNome: 'Outras entradas', totalNome: 'Total de entradas' },
+    { nome: 'Baixas', principal: ['baixa'], extras: [['remessa', 'Remessas a outro juízo']], extrasNome: 'Outras saídas', totalNome: 'Total de saídas' },
+    { nome: 'Julgamentos', principal: ['jcm', 'jsm'], partes: [['jcm', 'Com mérito'], ['jsm', 'Sem mérito']] },
+    { nome: 'Decisões', principal: ['decisao'] },
+    { nome: 'Despachos', principal: ['despacho'] },
+  ];
   html.push(secao('Movimentações da unidade', `${escopo} · mês corrente${filtroAtivo() ? ' · com filtros aplicados' : ''}`,
-    `<div class="grid kpis-principais">${['entradas', 'saidas', 'julg', 'decisao', 'despacho'].map(k => cardGrupo(GRUPOS[k])).join('')}</div>`));
+    `<div class="grid kpis-principais">${CARDS.map(cardKpi).join('')}</div>`));
 
   // --- Indicadores complementares: audiências, migração (não somada) e acervo (exclusivo eProc)
   const migrOut = pje ? pje.migradosParaEproc : null;
@@ -345,7 +375,7 @@ function render() {
       <div class="val">${eproc ? fmt(eproc.acervo) : '—'}</div>
       <div class="resumo">Posição do dia anterior · não afetado pelos filtros</div></div>`;
   html.push(secao('Indicadores complementares', '',
-    `<div class="grid kpis-compl">${cardGrupo(GRUPOS.aud)}${cardMigr}${cardAcervo}</div>`));
+    `<div class="grid kpis-compl">${cardKpi({ nome: 'Audiências', principal: ['aud'] })}${cardMigr}${cardAcervo}</div>`));
 
   // --- Tabela comparativa
   const c = v => v == null ? '<td class="na">—</td>' : `<td>${fmt(v)}</td>`;
@@ -376,7 +406,7 @@ function render() {
   // --- Gráficos
   html.push(`<div class="grid cols2 secao">
     <section class="secao" style="margin-top:0"><div class="secao-tit"><h2>Evolução diária no mês</h2></div><div class="card">
-      <div class="chart-head"><label class="nota">Indicador <select id="g-dia">${Object.entries(GRUPOS).map(([k, g]) => `<option value="${k}">${g.nome}</option>`).join('')}${METRICAS.map(m => `<option value="m:${m.k}">· ${m.nome}</option>`).join('')}</select></label>
+      <div class="chart-head"><label class="nota">Indicador <select id="g-dia"><option value="m:dist">Distribuições</option><option value="m:baixa">Baixas</option><option value="julg">Julgamentos</option><option value="decisao">Decisões</option><option value="despacho">Despachos</option><option value="aud">Audiências</option><optgroup label="Totais"><option value="entradas">Total de entradas</option><option value="saidas">Total de saídas</option></optgroup><optgroup label="Outras movimentações">${METRICAS.filter(m => ['receb','reativ','virt','remessa','jcm','jsm','sessao','juri','restaur','conclusao'].includes(m.k)).map(m => `<option value="m:${m.k}">${m.nome}</option>`).join('')}</optgroup></select></label>
       <div class="seg" id="g-modo"><button type="button" data-v="dia" aria-pressed="true">Diário</button><button type="button" data-v="acum" aria-pressed="false">Acumulado</button></div></div>
       <div class="legend">${usa('pje') ? '<span><span class="dot pje"></span>PJe</span>' : ''}${usa('eproc') ? '<span><span class="dot eproc"></span>eProc</span>' : ''}</div>
       <div id="graf-dia"></div></div></section>
@@ -508,7 +538,7 @@ function ligarGraficos() {
       let ac = 0;
       return { ...sd, v: dias.map(d => acum ? (ac += porDia[d] || 0) : porDia[d] || 0) };
     });
-    const nome = sel.startsWith('m:') ? METRICAS.find(m => m.k === sel.slice(2)).nome : GRUPOS[sel].nome;
+    const nome = sel.startsWith('m:') ? METRICAS.find(m => m.k === sel.slice(2)).nome : (GRUPOS[sel].rotulo || GRUPOS[sel].nome);
     barrasEmpilhadas($('#graf-dia'), dias, series, { rotulo: dataBR, titulo: d => `${nome} · ${d.split('-').reverse().join('/')}${acum ? ' (acumulado)' : ''}`, aria: `${nome} por dia` });
   };
   $('#g-dia').onchange = desenharDia;
