@@ -43,6 +43,7 @@ header.top { display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: center
 .eyebrow { font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
 h1 { font-size: 26px; line-height: 1.2; margin: 4px 0 2px; font-weight: 650; letter-spacing: -.01em; }
 .sub { color: var(--ink-3); font-size: 13px; }
+.sub .magistrada b { color: var(--ink); font-weight: 600; }
 .fontes { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .fonte { display: grid; grid-template-columns: auto auto; column-gap: 8px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 7px 12px; min-width: 150px; }
 .fonte .nome { font-weight: 650; font-size: 13px; display: flex; align-items: center; gap: 7px; }
@@ -187,7 +188,7 @@ footer { margin-top: 30px; font-size: 12px; color: var(--ink-3); }
         <div class="eyebrow">TJMG · Movimentação Processual · Mês corrente</div>
         <h1>1ª Vara Cível da Comarca de Sete Lagoas</h1>
       </div>
-      <div class="sub">Painel unificado PJe + eProc · mês corrente · dados consultados no Qlik Sense do TJMG</div>
+      <div class="sub"><span class="magistrada">Juíza de Direito: <b>Dra. Daniela Diniz</b></span> · Painel unificado PJe + eProc · mês corrente · dados do Qlik Sense do TJMG</div>
     </div>
     <div class="fontes">
       <div class="fonte" id="f-pje"><span class="nome"><span class="dot pje"></span>PJe</span><span class="st">…</span></div>
@@ -210,7 +211,6 @@ footer { margin-top: 30px; font-size: 12px; color: var(--ink-3); }
     <label>Período
       <div class="periodo"><input type="date" id="f-ini" aria-label="De"><span>até</span><input type="date" id="f-fim" aria-label="Até"></div>
     </label>
-    <label>Magistrado(a) <select id="f-mag"><option value="">Todos</option></select></label>
     <button class="btn link btn-limpar" id="btn-limpar" type="button">Limpar filtros</button>
   </section>
   <div class="filtro-info" id="filtro-info"></div>
@@ -270,12 +270,11 @@ const GRUPOS = {
 
 // ===== Estado =====
 let D = null; // resposta do servidor
-const F = { sistema: 'ambos', ini: '', fim: '', mag: '' };
+const F = { sistema: 'ambos', ini: '', fim: '' };
 const MESES_ABREV = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 const fmt = n => (n ?? 0).toLocaleString('pt-BR');
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const normNome = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().trim();
 const cargaBR = t => { const m = String(t || '').match(/^(\d{4})-(\d{2})-(\d{2})(.*)$/); return m ? `${m[3]}/${m[2]}/${m[1]}${m[4]}` : String(t || ''); };
 const dataBR = iso => iso ? iso.slice(8, 10) + '/' + iso.slice(5, 7) : '';
 
@@ -292,9 +291,9 @@ function fatosFiltrados(sis) {
   const s = fonte(sis); if (!s) return [];
   return s.fatos.filter(f =>
     (!F.ini || f.data >= F.ini) && (!F.fim || f.data <= F.fim) &&
-    (!F.mag || normNome(f.magistrado) === F.mag) && MAPA[sis][f.metrica]);
+    MAPA[sis][f.metrica]);
 }
-function filtroAtivo() { return !!(F.ini || F.fim || F.mag); }
+function filtroAtivo() { return !!(F.ini || F.fim); }
 
 // Totais por chave canônica, por sistema
 function totais() {
@@ -342,7 +341,7 @@ function render() {
       <div class="det"><div><span>Saída “Migrado” no PJe</span><b>${migrOut == null ? '—' : fmt(migrOut)}</b></div>
       <div><span>Entrada “Migrado” no eProc${filtroAtivo() ? ' (filtrado)' : ''}</span><b>${eproc ? fmt(migrIn) : '—'}</b></div></div>
       <div class="resumo">Transferência entre sistemas: não entra nas entradas e saídas consolidadas.</div></div>`;
-  const cardAcervo = `<div class="card kpi"><div class="rot"><span>Acervo eProc <i class="info" title="Processos em acervo no eProc, posição do dia anterior. Não varia com os filtros de período ou magistrado. O painel do PJe não publica acervo.">i</i></span><span class="tag eproc">Exclusivo eProc</span></div>
+  const cardAcervo = `<div class="card kpi"><div class="rot"><span>Acervo eProc <i class="info" title="Processos em acervo no eProc, posição do dia anterior. Não varia com o filtro de período. O painel do PJe não publica acervo.">i</i></span><span class="tag eproc">Exclusivo eProc</span></div>
       <div class="val">${eproc ? fmt(eproc.acervo) : '—'}</div>
       <div class="resumo">Posição do dia anterior · não afetado pelos filtros</div></div>`;
   html.push(secao('Indicadores complementares', '',
@@ -385,7 +384,6 @@ function render() {
   </div>`);
 
   // --- Magistrados
-  html.push(secao('Por magistrado(a)', 'movimentações do mês por sistema', '<div class="card tabwrap" id="tab-mag"></div>'));
 
   // --- Exclusivo eProc: histórico mensal
   html.push(`<section class="secao"><div class="secao-tit"><h2><span class="dot eproc"></span>Histórico mensal — eProc</h2><span class="tag eproc">Exclusivo eProc</span><small>o app do PJe contém apenas o mês corrente · não afetado pelos filtros</small></div>
@@ -399,6 +397,7 @@ function render() {
     <li><span class="dot eproc"></span> <b>eProc</b>: app Qlik do eProc, pasta “Gráficos”; seleções ${seleTxt(eproc)}. Mesmas fórmulas da tabela dinâmica do painel: <code>Count(1)</code> por Métrica_EPROC. Acervo = <code>Count({&lt;ACERVO={'1'}&gt;} DISTINCT Processo_EPROC)</code>, só com a unidade selecionada (o painel avisa que o acervo não depende de mês/ano). ${eproc ? 'Última carga no Qlik: <b>' + esc(eproc.atualizacaoQlik) + '</b>.' : ''} ${eproc ? `<a href="${eproc.painel}" target="_blank" rel="noopener">Abrir painel original</a>` : ''}</li>
     <li><b>Consolidação</b>: somam-se apenas métricas equivalentes nos dois sistemas (mesma unidade, mesmo mês, contagem de movimentações por tipo). Os campos “Sistema” do app PJe contêm apenas PJe/PJe TR, portanto não há sobreposição com o eProc.</li>
     <li><b>Migração PJe → eProc</b> é o mesmo conjunto de processos visto dos dois lados (saída no PJe, entrada no eProc). Para não contar duas vezes nem inflar entradas/saídas, ela fica fora dos totais consolidados e aparece em separado.</li>
+    <li>Todas as movimentações da unidade entram nos totais, inclusive as lançadas em nome de magistrados em substituição, como nos painéis originais.</li>
     <li>Os indicadores contam <b>movimentações</b> (eventos), como nos painéis originais — um processo com dois despachos conta duas vezes.</li>
     <li>“Recebimento de outro juízo” e “Remessa a outro juízo” seguem a classificação de cada sistema; eventuais redistribuições entre PJe e eProc além da migração não são identificáveis nos painéis.</li>
   </ul></div></section>`);
@@ -521,28 +520,6 @@ function ligarGraficos() {
   const linhas = METRICAS.filter(m => m.k !== 'conclusao').map(m => ({ nome: m.nome, v: { pje: t.pje[m.k] || 0, eproc: t.eproc[m.k] || 0 }, na: { pje: m.tipo === 'eproc', eproc: m.tipo === 'pje' } }));
   barrasHorizontais($('#graf-comp'), linhas, serieDef.map(s => ({ k: s.sis, nome: s.nome, cor: s.cor })));
 
-  // --- magistrados
-  const mags = {};
-  for (const sd of [{ sis: 'pje' }, { sis: 'eproc' }]) if (usa(sd.sis)) for (const f of fatosFiltrados(sd.sis)) {
-    const k = MAPA[sd.sis][f.metrica]; if (k === 'migrIn' || k === 'conclusao') continue;
-    const n = normNome(f.magistrado);
-    mags[n] ??= { nome: f.magistrado, pje: {}, eproc: {} };
-    mags[n][sd.sis][k] = (mags[n][sd.sis][k] || 0) + f.qtd;
-  }
-  const cols = Object.entries(GRUPOS);
-  const sisList = ['pje', 'eproc'].filter(usa);
-  let tb = `<table><thead><tr><th>Magistrado(a)</th><th>Sistema</th>${cols.map(([, g]) => `<th>${g.nome}</th>`).join('')}</tr></thead><tbody>`;
-  const ordem = Object.values(mags).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
-  if (!ordem.length) tb += `<tr><td colspan="${cols.length + 2}">Sem movimentações para os filtros selecionados.</td></tr>`;
-  for (const mg of ordem) {
-    const rows = sisList.map(s => [s, mg[s]]).filter(([, o]) => Object.keys(o).length);
-    rows.forEach(([s, o], i) => {
-      tb += `<tr>${i === 0 ? `<td rowspan="${rows.length + (rows.length > 1 ? 1 : 0)}">${esc(mg.nome)}</td>` : ''}<td><span class="dot ${s}"></span> ${s === 'pje' ? 'PJe' : 'eProc'}</td>${cols.map(([, g]) => `<td>${fmt(soma(o, g.ks))}</td>`).join('')}</tr>`;
-    });
-    if (rows.length > 1) tb += `<tr><td class="tot">Total</td>${cols.map(([, g]) => `<td class="tot">${fmt(soma(mg.pje, g.ks) + soma(mg.eproc, g.ks))}</td>`).join('')}</tr>`;
-  }
-  $('#tab-mag').innerHTML = tb + '</tbody></table><p class="nota">Nomes de magistrados unificados entre os sistemas ignorando acentos e maiúsculas. Migração e Conclusão não entram nesta tabela.</p>';
-
   // --- histórico eProc
   const desenharHist = () => {
     const e = fonte('eproc');
@@ -604,18 +581,11 @@ function prepararFiltros() {
     const min = datas[0].slice(0, 8) + '01', max = datas[datas.length - 1];
     for (const id of ['#f-ini', '#f-fim']) { $(id).min = min; $(id).max = max; }
   }
-  const nomes = new Map();
-  for (const s of ['pje', 'eproc']) for (const f of fonte(s)?.fatos || []) nomes.set(normNome(f.magistrado), nomes.get(normNome(f.magistrado)) || f.magistrado);
-  const atual = F.mag;
-  $('#f-mag').innerHTML = '<option value="">Todos</option>' + [...nomes].sort((a, b) => a[1].localeCompare(b[1], 'pt-BR')).map(([k, n]) => `<option value="${esc(k)}">${esc(n)}</option>`).join('');
-  $('#f-mag').value = nomes.has(atual) ? atual : '';
-  F.mag = $('#f-mag').value;
 }
 function infoFiltro() {
   const p = [];
   if (F.ini || F.fim) p.push(`período ${F.ini ? dataBR(F.ini) : 'início do mês'} a ${F.fim ? dataBR(F.fim) : 'hoje'}`);
-  if (F.mag) p.push(`magistrado(a) ${$('#f-mag').selectedOptions[0].textContent}`);
-  $('#filtro-info').textContent = p.length ? 'Filtros: ' + p.join(' · ') + '. Migração do PJe e Acervo eProc não são filtráveis por data/magistrado.' : 'Sem filtros: mês corrente completo, todas as movimentações da unidade.';
+  $('#filtro-info').textContent = p.length ? 'Filtros: ' + p.join(' · ') + '. Migração do PJe e Acervo eProc não são filtráveis por data.' : 'Sem filtros: mês corrente completo, todas as movimentações da unidade.';
 }
 
 $('#f-sistema').addEventListener('click', ev => {
@@ -625,9 +595,8 @@ $('#f-sistema').addEventListener('click', ev => {
 });
 $('#f-ini').addEventListener('change', e => { F.ini = e.target.value; infoFiltro(); render(); });
 $('#f-fim').addEventListener('change', e => { F.fim = e.target.value; infoFiltro(); render(); });
-$('#f-mag').addEventListener('change', e => { F.mag = e.target.value; infoFiltro(); render(); });
 $('#btn-limpar').addEventListener('click', () => {
-  Object.assign(F, { ini: '', fim: '', mag: '' }); $('#f-ini').value = $('#f-fim').value = $('#f-mag').value = '';
+  Object.assign(F, { ini: '', fim: '' }); $('#f-ini').value = $('#f-fim').value = '';
   infoFiltro(); render();
 });
 $('#btn-tema').addEventListener('click', () => {
